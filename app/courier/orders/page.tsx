@@ -33,8 +33,8 @@ interface AvailableOrder {
   yallaShare: number
   courierEarning: number
   totalExpected: number
-  noCourierAt: Date | null
-  createdAt: Date
+  noCourierAt: string | null
+  createdAt: string
   customer: {
     id: string
     name: string
@@ -149,7 +149,7 @@ export default function CourierOrdersPage() {
                         day: "numeric",
                         hour: "2-digit",
                         minute: "2-digit",
-                      }).format(order.createdAt)}
+                      }).format(new Date(order.createdAt))}
                     </p>
                   </div>
                   <div className="text-left">

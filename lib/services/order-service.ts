@@ -184,7 +184,7 @@ export async function createOrder(
   sessionUserId: string
 ): Promise<OrderResult> {
   // Idempotency: إذا سبق إنشاءه بنجاح، أعد النتيجة نفسها.
-  const cached = await findIdempotentResult(input.idempotencyKey)
+  const cached = await findIdempotentResult(input.idempotencyKey, sessionUserId, "CREATE_ORDER")
   if (cached) return cached.response as OrderResult
 
   try {
@@ -335,7 +335,7 @@ export async function createOrder(
     if (isUniqueViolation(err)) {
       // طلب مزامن فاز بالمفتاح: استرجاع النتيجة الملتزمة بعد لحظة.
       for (let attempt = 0; attempt < 6; attempt++) {
-        const won = await findIdempotentResult(input.idempotencyKey)
+        const won = await findIdempotentResult(input.idempotencyKey, sessionUserId, "CREATE_ORDER")
         if (won) return won.response as OrderResult
         await new Promise((resolve) => setTimeout(resolve, 50))
       }

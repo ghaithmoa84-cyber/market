@@ -176,6 +176,35 @@ export async function updateCourierStatus(
   userId: string,
   input: CourierStatusUpdate
 ): Promise<void> {
+  if (input.status === CourierStatus.AVAILABLE || input.status === CourierStatus.OFFLINE) {
+    const profile = await prisma.courierProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    })
+    if (!profile) {
+      throw new Error("الملف الشخصي للمندوب غير موجود")
+    }
+
+    const activeOrder = await prisma.order.findFirst({
+      where: {
+        courierId: profile.id,
+        status: {
+          in: [
+            OrderStatus.SEARCHING_COURIER,
+            OrderStatus.COURIER_ASSIGNED,
+            OrderStatus.COURIER_ACCEPTED,
+            OrderStatus.GOING_TO_STORE,
+            OrderStatus.SHOPPING,
+          ],
+        },
+      },
+      select: { id: true },
+    })
+    if (activeOrder) {
+      throw new Error("لا يمكن تغيير الحالة أثناء وجود طلب نشط")
+    }
+  }
+
   await prisma.courierProfile.update({
     where: { userId },
     data: { status: input.status },
@@ -186,7 +215,7 @@ export async function acceptOrder(
   courierUserId: string,
   input: AcceptOrderInput
 ): Promise<AcceptOrderResult> {
-  const cached = await findIdempotentResult(input.idempotencyKey)
+  const cached = await findIdempotentResult(input.idempotencyKey, courierUserId, "COURIER_ACCEPT_ORDER")
   if (cached) {
     return cached.response as AcceptOrderResult
   }
@@ -256,7 +285,7 @@ export async function acceptOrder(
   } catch (err) {
     if (isUniqueViolation(err)) {
       for (let attempt = 0; attempt < 6; attempt++) {
-        const won = await findIdempotentResult(input.idempotencyKey)
+        const won = await findIdempotentResult(input.idempotencyKey, courierUserId, "COURIER_ACCEPT_ORDER")
         if (won) return won.response as AcceptOrderResult
         await new Promise((resolve) => setTimeout(resolve, 50))
       }
@@ -269,7 +298,7 @@ export async function transitionOrderStatus(
   courierUserId: string,
   input: TransitionInput
 ): Promise<TransitionResult> {
-  const cached = await findIdempotentResult(input.idempotencyKey)
+  const cached = await findIdempotentResult(input.idempotencyKey, courierUserId, `COURIER_TRANSITION_${input.to}`)
   if (cached) {
     return cached.response as TransitionResult
   }
@@ -309,7 +338,7 @@ export async function transitionOrderStatus(
   try {
     const result = await prisma.$transaction(async (tx) => {
       const updated = await tx.order.update({
-        where: { id: input.orderId },
+        where: { id: input.orderId, status: order.status },
         data: { status: input.to },
         select: { id: true, status: true },
       })
@@ -342,9 +371,12 @@ export async function transitionOrderStatus(
 
     return result
   } catch (err) {
+    if (err instanceof Error && err.message.includes("Record to update not found")) {
+      throw new Error("الطلب غير موجود أو غير مسند لهذا المندوب")
+    }
     if (isUniqueViolation(err)) {
       for (let attempt = 0; attempt < 6; attempt++) {
-        const won = await findIdempotentResult(input.idempotencyKey)
+        const won = await findIdempotentResult(input.idempotencyKey, courierUserId, `COURIER_TRANSITION_${input.to}`)
         if (won) return won.response as TransitionResult
         await new Promise((resolve) => setTimeout(resolve, 50))
       }

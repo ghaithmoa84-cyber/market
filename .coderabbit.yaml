@@ -97,7 +97,7 @@ path_instructions:
       - تباين الألوان وإمكانية الوصول (Accessibility).
       - الاستجابة لأحجام الشاشات المختلفة (Responsive).
 
-  - path: "app/(courier)/**/*.tsx"
+  - path: "app/courier/**/*.tsx"
     instructions: |
       راجع هذا الملف بصفتك خبيراً في قابلية الاستخدام. تحقق من:
       - وضوح الحالة الحالية للمهمة أو الطلب في كل لحظة.

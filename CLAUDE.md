@@ -24,9 +24,9 @@ Yalla Market منصة محلية في القنجرة وجناتا — ريف ا�
 
 ## القواعد الصارمة (لا استثناء)
 
-1. اقرأ `Sprint 1 Brief.md` أولاً قبل كتابة أي كود
+1. اقرأ `Sprint 5 Brief.md` أولاً قبل كتابة أي كود
 2. اقرأ `MVP Technical Specification V1.1.docx` للمرجعية التقنية
-3. لا تنفذ أي شيء خارج نطاق Sprint 1 Brief
+3. لا تنفذ أي شيء خارج نطاق Sprint 5 Brief
 4. لا تغير Schema بدون شرح السبب
 5. لا تضف مكتبة جديدة بدون حاجة واضحة
 6. TypeScript strict — لا `any` بلا سبب موثق
@@ -77,8 +77,8 @@ Mobile-first
 
 ## Sprint الحالي
 
-**Sprint 1 — Foundation & Security**
-التفاصيل الكاملة في ملف: `Sprint 1 Brief.md`
+**Sprint 5 — Alternatives & Weighted Items**
+التفاصيل الكاملة في ملف: `Sprint 5 Brief.md`
 
 ---
 
