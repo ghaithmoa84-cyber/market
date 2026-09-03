@@ -18,15 +18,8 @@ const allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
     OrderStatus.COURIER_ASSIGNED,
     OrderStatus.CANCELLED,
   ],
-  [OrderStatus.COURIER_ASSIGNED]: [
-    OrderStatus.COURIER_ACCEPTED,
-    OrderStatus.SEARCHING_COURIER,
-    OrderStatus.CANCELLED,
-  ],
-  [OrderStatus.COURIER_ACCEPTED]: [
-    OrderStatus.GOING_TO_STORE,
-    OrderStatus.CANCELLED,
-  ],
+  [OrderStatus.COURIER_ASSIGNED]: [OrderStatus.GOING_TO_STORE, OrderStatus.CANCELLED],
+  [OrderStatus.COURIER_ACCEPTED]: [OrderStatus.GOING_TO_STORE, OrderStatus.CANCELLED],
   [OrderStatus.GOING_TO_STORE]: [OrderStatus.SHOPPING, OrderStatus.CANCELLED],
   [OrderStatus.SHOPPING]: [
     OrderStatus.PURCHASED,

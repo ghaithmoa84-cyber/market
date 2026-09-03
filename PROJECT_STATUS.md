@@ -4,7 +4,8 @@
 Sprint 1 — Foundation & Security (مكتمل ✅)
 Sprint 2 — Products & Search (مكتمل ✅)
 Sprint 3 — Cart & Orders (مكتمل ✅)
-Sprint 4 — Courier (قيد التنفيذ)
+Sprint 4 — Courier (مكتمل ✅)
+Sprint 5 — Alternatives & Weighted Items (قيد التنفيذ)
 
 ## ما اكتمل حتى الآن
 - [x] تهيئة المشروع: Next.js 16.x, TypeScript strict, Tailwind 4
@@ -29,19 +30,17 @@ Sprint 4 — Courier (قيد التنفيذ)
 - [x] Sprint 3: lib/services/pricing-service.ts — حساب السعر على الخادم (Server is source of truth)
 - [x] Sprint 3: lib/validations/order.ts — Zod schemas (cartItem, createOrder, createAddress)
 
-## ما تبقى في Sprint 3
-- [ ] app/api/orders/route.ts — POST إنشاء طلب Idempotent
-- [ ] app/api/orders/[id]/route.ts — GET حالة الطلب
-- [ ] app/api/addresses/route.ts — CRUD العناوين
-- [ ] app/(customer)/cart/page.tsx
-- [ ] app/(customer)/orders/page.tsx
-- [ ] app/(customer)/orders/[id]/page.tsx
-- [ ] Done Criteria كاملة
-- [ ] اختبارات Sprint 3
+## Sprint 4 — Courier (مكتمل ✅)
+- [x] Prisma Schema جاهز (OrderStatus, CourierStatus, OrderEvent, IdempotencyRecord)
+- [x] lib/services/courier-service.ts — getAvailableOrders, acceptOrder (Atomic), updateCourierStatus, transitionOrderStatus
+- [x] API routes: /api/courier/*
+- [x] Courier UI: Online/Offline, Available/Busy, orders list, order details
+- [x] اختبارات التزامن (Atomic Accept) — 16/16 نجح
+- [x] CodeRabbit review + PR
+
+## Sprint 5 — Alternatives & Weighted Items (قيد التنفيذ)
 
 ## Sprints القادمة
-- Sprint 4: Courier
-- Sprint 5: Alternatives & Weighted Items
 - Sprint 6: Delivery & Finance
 - Sprint 7: Full Admin
 - Sprint 8: QA & Production
@@ -60,7 +59,7 @@ Sprint 4 — Courier (قيد التنفيذ)
 ## ملفات المرجع
 - `Yalla Market Finder.docx` — رؤية المشروع والقرارات التشغيلية
 - `MVP Technical Specification V1.1.docx` — المرجع التقني الكامل
-- `Sprint 3 Brief.md` — تفاصيل Sprint الحالي
+- `Sprint 4 Brief.md` — تفاصيل Sprint الحالي
 - `CLAUDE.md` — قواعد العمل الدائمة
 
 ## تعليمات لأي محادثة جديدة
