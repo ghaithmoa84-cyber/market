@@ -1,0 +1,160 @@
+# CodeRabbit configuration for the Market project
+# Docs: https://docs.coderabbit.ai
+
+system_prompt: |
+  قبل أي مراجعة، اقرأ ملف CLAUDE.md بالكامل. القواعد الـ11 المذكورة فيه هي أساس المراجعة. أي كود يخالفها يُعتبر عائقاً (blocker).
+
+language: ar-SA
+
+tone_instructions: |
+  راجع أي كود مالي أو متعلق بالصلاحيات بأقصى درجة من التدقيق.
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary:
+    enabled: true
+    max_length: 3
+    language: ar-SA
+  auto_title_placeholder: ""
+  sequence_diagrams: false
+  poem: false
+  collapse_walkthrough: false
+  suggested_reviewers: false
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    ignore_title_keywords: []
+    labels: []
+    drafts: false
+    base_branches: []
+  finishing_reviews:
+    enabled: true
+  pre_merge_checks:
+    enabled: false
+  path_filters:
+    ignored:
+      - "node_modules/**"
+      - "dist/**"
+      - "build/**"
+      - ".next/**"
+      - "coverage/**"
+      - "out/**"
+      - "**/*.min.js"
+      - "**/*.min.css"
+      - "**/*.map"
+      - "**/*.lock"
+      - "migrations/**"
+      - "**/*.png"
+      - "**/*.jpg"
+      - "**/*.jpeg"
+      - "**/*.gif"
+      - "**/*.svg"
+      - "**/*.webp"
+      - "**/*.ico"
+      - "**/*.pdf"
+      - "**/*.zip"
+      - "**/*.tar.gz"
+
+path_instructions:
+  - path: "prisma/**/*.prisma"
+    instructions: |
+      راجع هذا الملف بصفتك خبيراً في Prisma. تحقق من:
+      - صحة العلاقات بين النماذج (Relations) والقيود على cascading.
+      - تعريف الفهارس (Indexes) الضرورية للأداء، خصوصاً في الجداول الكبيرة.
+      - التعامل مع الحقول المالية بدقة (Decimal بدلاً من Float، تحديد الدقة).
+      - استخدام التعدادات (Enums) بشكل صحيح للحالات.
+      - التحقق من تطبيق @unique و @id بشكل صحيح.
+      - التحقق من سلامة الإحالات (Back-references).
+
+  - path: "app/api/**/*.ts"
+    instructions: |
+      راجع هذا الملف بصفتك خبيراً أمنياً. تحقق من:
+      - Authentication: التحقق من هوية المستخدم بشكل صحيح (JWT, Session).
+      - Authorization: التحقق من الصلاحيات قبل كل عملية حساسة.
+      - التحقق من المدخلات باستخدام Zod أو ما يعادله.
+      - استخدام Transactions عند الحاجة للحفاظ على الاتساق.
+      - تطبيق Idempotency-Key في العمليات التي تنشئ سجلات (POST).
+      - عدم تسريب معلومات حساسة في رسائل الخطأ أو السجلات.
+      - التحقق من Rate Limiting إن كان مطلوباً.
+      - منع حقن SQL أو NoSQL Injection.
+
+  - path: "lib/services/**/*.ts"
+    instructions: |
+      راجع هذا الملف بصفتك خبيراً محاسبياً. تحقق من:
+      - Ledger Append-only: عدم تعديل أو حذف القيود بعد إنشائها.
+      - Settlement Batch: تجميع التسويات بشكل صحيح ومتسق.
+      - استخدام Decimal (أو bigint) للحسابات المالية بدلاً من Float.
+      - تطبيق قاعدة Debit = Credit في كل قيد ثنائي.
+      - التحقق من دقة الكسور العشرية عند التقريب.
+      - تسجيل كل عملية مالية في سجل التدقيق (Audit Log).
+      - معالجة حالات التراجع (Rollback) عند فشل أي جزء من العملية.
+      - التحقق من تطابق الأرصدة قبل وبعد كل معاملة.
+
+  - path: "lib/state-machine/**/*.ts"
+    instructions: |
+      راجع هذا الملف بصفتك خبيراً في الأنظمة الموزعة. تحقق من:
+      - State transitions: التحقق من صحة كل انتقال بين الحالات.
+      - OrderEvent: معالجة الأحداث وفق ترتيب زمني ثابت (Event Ordering).
+      - تطبيق Idempotency لمنع تكرار تنفيذ نفس الحدث.
+      - استخدام Optimistic Locking أو Versioning لتجنب فقدان التحديثات.
+      - التعامل مع حالات الفشل الجزئي (Partial Failure) والتراجع.
+      - التحقق من تطابق الحالة النهائية بعد كل انتقال.
+      - دعم معالجة الأحداث المتأخرة أو الخارجة عن الترتيب.
+
+  - path: "app/(customer)/**/*.tsx"
+    instructions: |
+      راجع هذا الملف بصفتك خبيراً في تجربة المستخدم. تحقق من:
+      - Loading states: عرض مؤشرات تحميل واضحة أثناء الانتظار.
+      - منع النقر المزدوج على الأزرار (Debounce/Disable).
+      - دعم RTL بشكل صحيح للغة العربية.
+      - رسائل الخطأ واضحة ومفيدة للمستخدم.
+      - التنقل سلس ولا يكسر تجربة التصفح (Back/Forward).
+      - تباين الألوان وإمكانية الوصول (Accessibility).
+      - الاستجابة لأحجام الشاشات المختلفة (Responsive).
+
+  - path: "app/(courier)/**/*.tsx"
+    instructions: |
+      راجع هذا الملف بصفتك خبيراً في قابلية الاستخدام. تحقق من:
+      - وضوح الحالة الحالية للمهمة أو الطلب في كل لحظة.
+      - الأزرار كبيرة بما يكفي للاستخدام أثناء التنقل.
+      - تأكيد الإجراءات الحساسة (تأكيد التسليم، الإلغاء).
+      - تقليل عدد النقرات المطلوبة لإكمال المهمة.
+      - عرض المعلومات الجوهرية فقط (الموقع، الوقت، الحالة).
+      - دعم العمل دون اتصال أو مع شبكة ضعيفة.
+
+  - path: "app/(admin)/**/*.tsx"
+    instructions: |
+      راجع هذا الملف بصفتك خبيراً أمنياً. تحقق من:
+      - حماية الصلاحيات: التحقق من صلاحيات المدير قبل كل عملية.
+      - عدم عرض بيانات حساسة في الواجهة إلا عند الضرورة.
+      - إخفاء المعلومات الحساسة (PII) في الجداول والقوائم.
+      - تسجيل كل عملية إدارية في سجل التدقيق.
+      - تأكيد الإجراءات الحساسة (حذف، تعديل جوهري).
+      - حماية المسارات الإدارية من الوصول غير المصرح به.
+      - التحقق من تطابق الفلاتر والبحث مع صلاحيات المستخدم.
+
+  - path: "**/*.{ts,tsx,js,jsx}"
+    instructions: |
+      راجع هذا الملف بصفتك خبيراً في TypeScript. تحقق من:
+      - منع استخدام `any` واستبداله بـ `unknown` أو نوع محدد.
+      - التعامل الصحيح مع `null` و `undefined` (Optional Chaining, Nullish Coalescing).
+      - التوثيق: إضافة JSDoc للدوال العامة والواجهات.
+      - استخدام Types بدلاً من Interfaces عندما يكون ذلك أنسب.
+      - التمييز بين `type` و `interface` وفق السياق.
+      - تجنب Type Assertions غير الضرورية.
+      - استخدام Generics لتحسين إعادة الاستخدام والأمان.
+
+      طبق القواعد التالية من CLAUDE.md بدقة:
+      - TypeScript strict، ممنوع استخدام `any` دون سبب موثق.
+      - استخدم Zod لكل input خارجي.
+      - تأكد من وجود Role check في كل API.
+      - استخدم Prisma Transactions للعمليات متعددة الخطوات.
+      - لا تضع أي secrets في الكود.
+      - لا تكتم الأخطاء بـ silent catch.
+      - كل تغيير في السعر يسجل PriceHistory.
+      - كل انتقال لحالة الطلب يمر عبر State Machine ويسجل OrderEvent.
+      - السجلات المالية (Ledger) هي Append-only، والعمليات المالية Idempotent.
+
+chat:
+  auto_reply: true
