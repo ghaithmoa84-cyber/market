@@ -43,5 +43,12 @@ testsprite_tests/tmp/
 testsprite_tests/tmp/config.json
 
 # منع رفع الملفات الحساسة إلى GitHub (تبقى محلياً للاستخدام الشخصي)
+cookies.txt
 cookies_*.txt
+*.sql
+seed_*.sql
+product.html
+.vscode/
+.agents/
+.claude/
 market_docs_keep_tmp/

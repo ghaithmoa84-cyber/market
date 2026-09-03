@@ -1,0 +1,321 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  phone        String   @unique
+  name         String
+  role         Role     @default(CUSTOMER)
+  passwordHash String
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  customer     CustomerProfile?
+  courier      CourierProfile?
+}
+
+enum Role {
+  ADMIN
+  COURIER
+  CUSTOMER
+}
+
+model CustomerProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  addresses Address[]
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CourierProfile {
+  id          String        @id @default(cuid())
+  userId      String        @unique
+  user        User          @relation(fields: [userId], references: [id])
+  status      CourierStatus @default(OFFLINE)
+  vehicleType String
+  orders      Order[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum CourierStatus {
+  OFFLINE
+  AVAILABLE
+  BUSY
+  SUSPENDED
+}
+
+model Store {
+  id        String       @id @default(cuid())
+  name      String
+  address   String
+  phone     String?
+  isActive  Boolean      @default(true)
+  hours     StoreHours[]
+  products  StoreProduct[]
+  orderStores OrderStore[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model StoreHours {
+  id        String   @id @default(cuid())
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  dayOfWeek Int
+  opensAt   String?
+  closesAt  String?
+  isClosed  Boolean  @default(false)
+
+  @@unique([storeId, dayOfWeek])
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  isActive  Boolean   @default(true)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id            String         @id @default(cuid())
+  name          String
+  brand         String?
+  categoryId    String
+  category      Category       @relation(fields: [categoryId], references: [id])
+  storeProducts StoreProduct[]
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model StoreProduct {
+  id           String         @id @default(cuid())
+  storeId      String
+  productId    String
+  store        Store          @relation(fields: [storeId], references: [id])
+  product      Product        @relation(fields: [productId], references: [id])
+  price        Decimal        @db.Decimal(14, 2)
+  isActive     Boolean        @default(true)
+  priceHistory PriceHistory[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([storeId, productId])
+}
+
+model PriceHistory {
+  id             String       @id @default(cuid())
+  storeProductId String
+  storeProduct   StoreProduct @relation(fields: [storeProductId], references: [id])
+  price          Decimal      @db.Decimal(14, 2)
+  recordedAt     DateTime     @default(now())
+  changedById    String?
+}
+
+model SearchLog {
+  id           String   @id @default(cuid())
+  query        String
+  resultsCount Int
+  foundMatch   Boolean
+  userId       String?
+  createdAt    DateTime @default(now())
+
+  @@index([foundMatch, createdAt])
+}
+
+model Address {
+  id            String           @id @default(cuid())
+  customerId    String
+  customer      CustomerProfile  @relation(fields: [customerId], references: [id])
+  label         String?
+  addressText   String
+  lat           Float?
+  lng           Float?
+  deliveryNotes String?
+  isDefault     Boolean          @default(false)
+  orders        Order[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([customerId])
+}
+
+enum OrderStatus {
+  DRAFT
+  PENDING
+  SEARCHING_COURIER
+  COURIER_ASSIGNED
+  COURIER_ACCEPTED
+  GOING_TO_STORE
+  SHOPPING
+  WAITING_CUSTOMER_APPROVAL
+  PURCHASED
+  DELIVERING
+  DELIVERED
+  CONFIRMED
+  SETTLEMENT_PENDING
+  SETTLED
+  CANCELLED
+}
+
+enum CancelReason {
+  CUSTOMER_INITIATED
+  ADMIN_INITIATED
+  AUTO_TIMEOUT
+  STORE_UNAVAILABLE
+  COURIER_UNAVAILABLE
+}
+
+model Order {
+  id              String          @id @default(cuid())
+  customerId      String
+  courierId       String?
+  addressId       String
+  customer        CustomerProfile @relation(fields: [customerId], references: [id])
+  courier         CourierProfile? @relation(fields: [courierId], references: [id])
+  address         Address         @relation(fields: [addressId], references: [id])
+  status          OrderStatus     @default(DRAFT)
+  cancelReason    CancelReason?
+  subtotalExpected Decimal        @db.Decimal(14, 2)
+  subtotalActual   Decimal?       @db.Decimal(14, 2)
+  deliveryFee      Decimal        @db.Decimal(14, 2)
+  yallaShare       Decimal        @db.Decimal(14, 2)
+  courierEarning   Decimal        @db.Decimal(14, 2)
+  totalExpected    Decimal        @db.Decimal(14, 2)
+  totalActual      Decimal?       @db.Decimal(14, 2)
+  noCourierAt      DateTime?
+  deliveredAt      DateTime?
+  confirmedAt      DateTime?
+  cancelledAt      DateTime?
+  orderStores      OrderStore[]
+  items            OrderItem[]
+  events           OrderEvent[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([customerId, createdAt])
+  @@index([courierId, status])
+  @@index([status, createdAt])
+}
+
+model OrderStore {
+  id        String      @id @default(cuid())
+  orderId   String
+  storeId   String
+  order     Order       @relation(fields: [orderId], references: [id])
+  store     Store       @relation(fields: [storeId], references: [id])
+  items     OrderItem[]
+
+  @@unique([orderId, storeId])
+}
+
+model OrderItem {
+  id             String    @id @default(cuid())
+  orderId        String
+  orderStoreId   String
+  order          Order     @relation(fields: [orderId], references: [id])
+  orderStore     OrderStore @relation(fields: [orderStoreId], references: [id])
+  productId      String?
+  isCustom       Boolean   @default(false)
+  customDescription String?
+  unit           ItemUnit  @default(PIECE)
+  requestedQty   Decimal   @db.Decimal(10, 3)
+  actualQty      Decimal?  @db.Decimal(10, 3)
+  expectedPrice  Decimal   @db.Decimal(14, 2)
+  actualPrice    Decimal?  @db.Decimal(14, 2)
+  expectedTotal  Decimal   @db.Decimal(14, 2)
+  actualTotal    Decimal?  @db.Decimal(14, 2)
+  status         ItemStatus @default(PENDING)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([orderId])
+}
+
+enum ItemUnit {
+  PIECE
+  WEIGHT
+  VOLUME
+  PACKAGE
+}
+
+enum ItemStatus {
+  PENDING
+  PURCHASED
+  UNAVAILABLE
+  SUBSTITUTED
+  CANCELLED
+}
+
+model OrderEvent {
+  id        String         @id @default(cuid())
+  orderId   String
+  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  actorType OrderActorType
+  actorId   String?
+  event     OrderEventType
+  metadata  Json?
+  createdAt DateTime       @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+enum OrderActorType {
+  CUSTOMER
+  COURIER
+  ADMIN
+  SYSTEM
+}
+
+enum OrderEventType {
+  CREATED
+  SUBMITTED
+  SEARCHING_COURIER
+  COURIER_ASSIGNED
+  COURIER_ACCEPTED
+  GOING_TO_STORE
+  SHOPPING
+  ALTERNATIVE_PROPOSED
+  ALTERNATIVE_APPROVED
+  ALTERNATIVE_REJECTED
+  ALTERNATIVE_TIMEOUT
+  PRICE_APPROVAL_REQUESTED
+  PRICE_APPROVED
+  PRICE_REJECTED
+  ITEM_UNAVAILABLE
+  ITEM_PURCHASED
+  ORDER_PURCHASED
+  DELIVERING
+  DELIVERED
+  CUSTOMER_CONFIRMED
+  AUTO_CONFIRMED
+  CANCELLED
+  SETTLEMENT_PENDING
+  SETTLED
+  ADMIN_INTERVENTION
+}
+
+model IdempotencyRecord {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  operation   String
+  userId      String?
+  resourceId  String?
+  response    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([userId, operation])
+}
