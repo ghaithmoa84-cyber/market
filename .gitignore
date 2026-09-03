@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+testsprite_tests/tmp/
+testsprite_tests/tmp/config.json
+
+# منع رفع الملفات الحساسة إلى GitHub (تبقى محلياً للاستخدام الشخصي)
+cookies_*.txt
+market_docs_keep_tmp/
