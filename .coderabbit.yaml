@@ -1,60 +1,44 @@
 # CodeRabbit configuration for the Market project
 # Docs: https://docs.coderabbit.ai
 
-system_prompt: |
-  قبل أي مراجعة، اقرأ ملف CLAUDE.md بالكامل. القواعد الـ11 المذكورة فيه هي أساس المراجعة. أي كود يخالفها يُعتبر عائقاً (blocker).
-
-language: ar-SA
-
-tone_instructions: |
-  راجع أي كود مالي أو متعلق بالصلاحيات بأقصى درجة من التدقيق.
+language: ar
 
 reviews:
   profile: chill
   request_changes_workflow: false
-  high_level_summary:
-    enabled: true
-    max_length: 3
-    language: ar-SA
-  auto_title_placeholder: ""
+  high_level_summary: true
   sequence_diagrams: false
   poem: false
-  collapse_walkthrough: false
-  suggested_reviewers: false
   auto_review:
     enabled: true
     auto_incremental_review: true
-    ignore_title_keywords: []
-    labels: []
     drafts: false
-    base_branches: []
   finishing_reviews:
     enabled: true
   pre_merge_checks:
     enabled: false
   path_filters:
-    ignored:
-      - "node_modules/**"
-      - "dist/**"
-      - "build/**"
-      - ".next/**"
-      - "coverage/**"
-      - "out/**"
-      - "**/*.min.js"
-      - "**/*.min.css"
-      - "**/*.map"
-      - "**/*.lock"
-      - "migrations/**"
-      - "**/*.png"
-      - "**/*.jpg"
-      - "**/*.jpeg"
-      - "**/*.gif"
-      - "**/*.svg"
-      - "**/*.webp"
-      - "**/*.ico"
-      - "**/*.pdf"
-      - "**/*.zip"
-      - "**/*.tar.gz"
+    - "!node_modules/"
+    - "!dist/"
+    - "!build/"
+    - "!.next/"
+    - "!coverage/"
+    - "!out/"
+    - "!**/*.min.js"
+    - "!**/*.min.css"
+    - "!**/*.map"
+    - "!**/*.lock"
+    - "!migrations/"
+    - "!**/*.png"
+    - "!**/*.jpg"
+    - "!**/*.jpeg"
+    - "!**/*.gif"
+    - "!**/*.svg"
+    - "!**/*.webp"
+    - "!**/*.ico"
+    - "!**/*.pdf"
+    - "!**/*.zip"
+    - "!**/*.tar.gz"
 
 path_instructions:
   - path: "prisma/**/*.prisma"
