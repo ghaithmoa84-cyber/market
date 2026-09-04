@@ -67,7 +67,7 @@ export async function GET(
       },
     }
 
-    return NextResponse.json({ order: formattedOrder })
+    return NextResponse.json({ order: formattedOrder }, { headers: { "Cache-Control": "no-store" } })
   } catch (err) {
     console.error("Courier order detail error:", err)
     return NextResponse.json({ error: "خطأ في الخادم" }, { status: 500 })

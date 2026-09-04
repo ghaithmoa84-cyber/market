@@ -177,32 +177,40 @@ export async function updateCourierStatus(
   input: CourierStatusUpdate
 ): Promise<void> {
   if (input.status === CourierStatus.AVAILABLE || input.status === CourierStatus.OFFLINE) {
-    const profile = await prisma.courierProfile.findUnique({
-      where: { userId },
-      select: { id: true },
-    })
-    if (!profile) {
-      throw new Error("الملف الشخصي للمندوب غير موجود")
-    }
+    await prisma.$transaction(async (tx) => {
+      const profile = await tx.$queryRaw<{ id: string }>`
+        SELECT id FROM "CourierProfile" WHERE "userId" = ${userId} FOR UPDATE
+      `
+      if (!profile) {
+        throw new Error("الملف الشخصي للمندوب غير موجود")
+      }
+      const profileId = profile.id
 
-    const activeOrder = await prisma.order.findFirst({
-      where: {
-        courierId: profile.id,
-        status: {
-          in: [
-            OrderStatus.SEARCHING_COURIER,
-            OrderStatus.COURIER_ASSIGNED,
-            OrderStatus.COURIER_ACCEPTED,
-            OrderStatus.GOING_TO_STORE,
-            OrderStatus.SHOPPING,
-          ],
+      const activeOrder = await tx.order.findFirst({
+        where: {
+          courierId: profileId,
+          status: {
+            in: [
+              OrderStatus.SEARCHING_COURIER,
+              OrderStatus.COURIER_ASSIGNED,
+              OrderStatus.COURIER_ACCEPTED,
+              OrderStatus.GOING_TO_STORE,
+              OrderStatus.SHOPPING,
+            ],
+          },
         },
-      },
-      select: { id: true },
+        select: { id: true },
+      })
+      if (activeOrder) {
+        throw new Error("لا يمكن تغيير الحالة أثناء وجود طلب نشط")
+      }
+
+      await tx.courierProfile.update({
+        where: { userId },
+        data: { status: input.status },
+      })
     })
-    if (activeOrder) {
-      throw new Error("لا يمكن تغيير الحالة أثناء وجود طلب نشط")
-    }
+    return
   }
 
   await prisma.courierProfile.update({
@@ -220,22 +228,42 @@ export async function acceptOrder(
     return cached.response as AcceptOrderResult
   }
 
-  const profile = await prisma.courierProfile.findUnique({
-    where: { userId: courierUserId },
-    select: { id: true, status: true },
-  })
-  if (!profile) {
-    throw new Error("الملف الشخصي للمندوب غير موجود")
-  }
-  if (profile.status === CourierStatus.OFFLINE) {
-    throw new Error("المندوب غير متصل")
-  }
-
   try {
     const result = await prisma.$transaction(async (tx) => {
+      const profile = await tx.$queryRaw<{ id: string; status: string }>`
+        SELECT id, status FROM "CourierProfile" WHERE "userId" = ${courierUserId} FOR UPDATE
+      `
+      if (!profile) {
+        throw new Error("الملف الشخصي للمندوب غير موجود")
+      }
+      const profileData = profile
+
+      if (profileData.status === CourierStatus.OFFLINE) {
+        throw new Error("المندوب غير متصل")
+      }
+
+      const activeOrder = await tx.order.findFirst({
+        where: {
+          courierId: profileData.id,
+          status: {
+            in: [
+              OrderStatus.SEARCHING_COURIER,
+              OrderStatus.COURIER_ASSIGNED,
+              OrderStatus.COURIER_ACCEPTED,
+              OrderStatus.GOING_TO_STORE,
+              OrderStatus.SHOPPING,
+            ],
+          },
+        },
+        select: { id: true },
+      })
+      if (activeOrder) {
+        throw new Error("لا يمكن قبول طلب جديد أثناء وجود طلب نشط")
+      }
+
       const updated = await tx.$queryRaw`
         UPDATE "Order"
-        SET status = 'COURIER_ASSIGNED'::"OrderStatus", "courierId" = ${profile.id}
+        SET status = 'COURIER_ASSIGNED'::"OrderStatus", "courierId" = ${profileData.id}
         WHERE id = ${input.orderId} AND status::text = 'SEARCHING_COURIER'::text AND "courierId" IS NULL
         RETURNING id, status, "courierId"
       `
@@ -247,9 +275,9 @@ export async function acceptOrder(
 
       assertTransition(OrderStatus.SEARCHING_COURIER, OrderStatus.COURIER_ASSIGNED)
 
-      if (profile.status === CourierStatus.AVAILABLE) {
+      if (profileData.status === CourierStatus.AVAILABLE) {
         await tx.courierProfile.update({
-          where: { id: profile.id },
+          where: { id: profileData.id },
           data: { status: CourierStatus.BUSY },
         })
       }
@@ -266,7 +294,7 @@ export async function acceptOrder(
       const response: AcceptOrderResult = {
         orderId: order.id,
         status: order.status,
-        courierId: order.courierId ?? profile.id,
+        courierId: order.courierId ?? profileData.id,
       }
 
       await recordIdempotencyResult(
