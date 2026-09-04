@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
+import { edgeAuth as auth } from "@/lib/auth-edge"
 
 export const config = {
   matcher: [

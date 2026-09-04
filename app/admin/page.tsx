@@ -38,7 +38,7 @@ async function StatCard({
 }) {
   const res = await fetch(
     `${process.env.NEXTAUTH_URL}/api/admin?resource=stats`,
-    { next: { tags: ["admin-stats"] } }
+    { next: { tags: ["admin-stats"] }, credentials: "include" }
   )
 
   let count = 0

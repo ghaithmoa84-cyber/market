@@ -9,7 +9,7 @@ export interface PricingBreakdown {
 }
 
 function round2(value: number): number {
-  return Math.round(value * 100) / 100
+  return Number(Math.round((value + Number.EPSILON) * 100) / 100)
 }
 
 // Delivery Fee = baseFee + MAX(minVariableFee, percent × cartValue)

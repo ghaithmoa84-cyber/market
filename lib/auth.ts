@@ -15,11 +15,6 @@ declare module "next-auth" {
       phone?: string
     }
   }
-  interface JWT {
-    role?: string
-    id?: string
-    phone?: string
-  }
 }
 
 const credentialsSchema = z.object({
@@ -39,7 +34,7 @@ export const authConfig = {
         phone: { label: "رقم الهاتف", type: "tel" },
         password: { label: "كلمة المرور", type: "password" },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials, _req) {
         try {
           const parsed = credentialsSchema.safeParse(credentials)
           if (!parsed.success) {
@@ -102,6 +97,7 @@ export const authConfig = {
       if (user) {
         token.role = (user as { role?: string }).role ?? undefined
         token.id = (user as { id?: string }).id ?? token.id
+        token.phone = (user as { phone?: string }).phone ?? token.phone
       }
       return token
     },

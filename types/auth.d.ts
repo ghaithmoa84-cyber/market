@@ -12,6 +12,9 @@ declare module "next-auth" {
       phone?: string
     }
   }
+}
+
+declare module "next-auth/jwt" {
   interface JWT {
     role?: string
     id?: string

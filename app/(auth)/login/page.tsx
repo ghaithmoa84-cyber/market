@@ -15,7 +15,11 @@ function LoginForm({ onSuccess }: { onSuccess: (url: string) => void }) {
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [csrfToken, setCsrfToken] = useState("")
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/"
+  const rawCallbackUrl = searchParams.get("callbackUrl") ?? "/"
+  const callbackUrl =
+    rawCallbackUrl.startsWith("/") && !rawCallbackUrl.startsWith("//")
+      ? rawCallbackUrl
+      : "/"
 
   useEffect(() => {
     fetch("/api/auth/csrf")

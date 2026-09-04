@@ -19,9 +19,9 @@ export default async function CustomerHomePage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <CategoryLink href="/categories" title="تصفح الفئات" description="استعرض جميع الفئات المتاحة" />
-        <CategoryLink href="/search" title="بحث عن منتج" description="ابحث عن أي منتج تريده" />
-        <CategoryLink href="/stores" title="المتاجر" description="تصفح المتاجر النشطة" />
+        <CategoryLink href="/customer/categories" title="تصفح الفئات" description="استعرض جميع الفئات المتاحة" />
+        <CategoryLink href="/customer/search" title="بحث عن منتج" description="ابحث عن أي منتج تريده" />
+        <CategoryLink href="/customer/stores" title="المتاجر" description="تصفح المتاجر النشطة" />
       </div>
     </div>
   )

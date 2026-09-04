@@ -9,7 +9,7 @@ export default async function HomePage() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4" dir="rtl">
         <div className="text-center space-y-6">
           <h1 className="text-4xl font-bold text-primary">
-            يلا ماركت — يلا ماركت
+            يلا ماركت
           </h1>
           <p className="text-lg text-gray-600">
             منصة توصيل محلية في القنجرة وجناتا
@@ -26,9 +26,6 @@ export default async function HomePage() {
   }
 
   const role = session.user?.role
-  let dashboardHref = "/"
-
-  if (role === "ADMIN") dashboardHref = "/admin"
 
   return (
     <div className="min-h-screen bg-gray-50 p-4" dir="rtl">

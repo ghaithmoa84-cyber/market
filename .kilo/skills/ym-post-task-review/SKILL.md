@@ -39,7 +39,7 @@ Execute these steps in order. Do not skip any step.
 Run:
 
 ```shell
-npx tsc --noEmit
+npx --no-install tsc --noEmit
 ```
 
 Requirements:

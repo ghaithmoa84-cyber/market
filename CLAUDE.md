@@ -66,7 +66,7 @@ Mobile-first
 
 ## بعد كل تنفيذ يجب أن تفعل
 
-1. شغّل: `npx tsc --noEmit`
+1. شغّل: `npx --no-install tsc --noEmit`
 2. شغّل: `npm run build`
 3. أصلح كل الأخطاء
 4. قدم قائمة الملفات التي تغيرت

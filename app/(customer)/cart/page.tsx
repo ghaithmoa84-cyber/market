@@ -300,19 +300,19 @@ export default function CartPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label>اسم المتجر</Label>
-            <Input
-              value={form.storeName}
-              onChange={(e) => setForm({ ...form, storeName: e.target.value, storeId: e.target.value })}
-              placeholder="مثال: متجر الفضة"
-            />
+             <Input
+                value={form.storeName}
+                onChange={(e) => setForm({ ...form, storeName: e.target.value })}
+                placeholder="مثال: متجر الفضة"
+              />
           </div>
           <div>
             <Label>اسم المنتج (اختياري)</Label>
             <Input
-              value={form.productName}
-              onChange={(e) => setForm({ ...form, productName: e.target.value, productId: e.target.value })}
-              placeholder="مثال: خبز"
-            />
+                value={form.productName}
+                onChange={(e) => setForm({ ...form, productName: e.target.value })}
+                placeholder="مثال: خبز"
+              />
           </div>
         </div>
         <div className="flex items-center gap-2">

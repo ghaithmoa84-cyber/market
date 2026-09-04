@@ -12,10 +12,10 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
             يلا ماركت
           </Link>
           <nav className="flex gap-4">
-            <Link href="/categories" className="hover:text-secondary transition-colors">
+            <Link href="/customer/categories" className="hover:text-secondary transition-colors">
               الفئات
             </Link>
-            <Link href="/search" className="hover:text-secondary transition-colors">
+            <Link href="/customer/search" className="hover:text-secondary transition-colors">
               بحث
             </Link>
           </nav>

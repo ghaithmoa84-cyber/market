@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { PrismaClient } = require('@prisma/client');
 const p = new PrismaClient();
 
@@ -9,6 +10,7 @@ const p = new PrismaClient();
     console.log(JSON.stringify(logs, null, 2));
   } catch (err) {
     console.error(err);
+    process.exitCode = 1;
   } finally {
     await p.$disconnect();
   }
