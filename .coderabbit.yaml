@@ -2,12 +2,7 @@
 # Docs: https://docs.coderabbit.ai
 
 language: ar
-tone_instructions: >
-  كن صارم جداً على المشاكل الأمنية والمالية. استخدم علامة 💥 Blocker على أي
-  مخالفة للقواعد الـ 11 في CLAUDE.md، على Done Criteria في Sprint Brief، وعلى
-  أي ثغرة في Authentication/Authorization/Idempotency/Atomic Accept.
-  استخدم 💡 Suggestion للملاحظات غير الحرجة. لا تستخدم tone مناسب للـ "chill"
-  على القضايا التي قد تؤثر على البيانات المالية أو سلامة الـ Ledger.
+tone_instructions: كن صارم على المشاكل الأمنية والمالية. 💥 Blocker لأي مخالفة لقواعد CLAUDE.md أو Done Criteria. 💡 لغير الحرجة. لا تستخدم "chill" على القضايا المالية.
 
 reviews:
   profile: chill
