@@ -40,6 +40,17 @@ Sprint 5 — Alternatives & Weighted Items (قيد التنفيذ)
 
 ## Sprint 5 — Alternatives & Weighted Items (قيد التنفيذ)
 
+## البنية التحتية للمراجعة (مضافة في Sprint 4)
+- `.coderabbit.yaml` — مراجعة صارمة على الأمان والماليات (`request_changes_workflow: true`، `tone_instructions` صارمة، `language: ar`)
+- `.kilo/command/pre-flight.md` — بوابة إلزامية قبل كل رفع (`tsc + build + lint + Done Criteria`)
+- `.kilo/command/code-review.md` — دليل دورة المراجعة الثنائية (VS Code + GitHub)
+- `.kilo/agent/reviewer.md` — وكيل مراجعة فرعي يكرر دور CodeRabbit ↔ Kilo حتى تنقضي Blockers
+- `.kilo/skills/coderabbit-review/SKILL.md` — مهارة مدمجة بالخطة الكاملة والقواعد الذهبية
+
+## قاعدة ذهبية من الآن
+قبل كل `git push`:
+شغّل `/pre-flight` أولاً — ثم افتح الـ PR واترك CodeRabbit يراجع السياق الكامل.
+
 ## Sprints القادمة
 - Sprint 6: Delivery & Finance
 - Sprint 7: Full Admin

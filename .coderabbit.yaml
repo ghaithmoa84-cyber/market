@@ -2,10 +2,16 @@
 # Docs: https://docs.coderabbit.ai
 
 language: ar
+tone_instructions: >
+  كن صارم جداً على المشاكل الأمنية والمالية. استخدم علامة 💥 Blocker على أي
+  مخالفة للقواعد الـ 11 في CLAUDE.md، على Done Criteria في Sprint Brief، وعلى
+  أي ثغرة في Authentication/Authorization/Idempotency/Atomic Accept.
+  استخدم 💡 Suggestion للملاحظات غير الحرجة. لا تستخدم tone مناسب للـ "chill"
+  على القضايا التي قد تؤثر على البيانات المالية أو سلامة الـ Ledger.
 
 reviews:
   profile: chill
-  request_changes_workflow: false
+  request_changes_workflow: true
   high_level_summary: true
   sequence_diagrams: false
   poem: false
@@ -41,6 +47,28 @@ reviews:
     - "!**/*.tar.gz"
 
 path_instructions:
+  - path: "app/(courier)/**/*.tsx"
+    instructions: |
+      راجع كخبير تجربة مستخدم للأجهزة المحمولة. تحقق من:
+      - أزرار بحد أدنى 48px (Mobile-first) — قاعدة UI من CLAUDE.md.
+      - حالة المهمة واضحة في كل لحظة (Online/Offline، Available/Busy).
+      - التأكيد على الإجراءات الحسّاسة (قبول الطلب، الانتقال للحالة التالية).
+      - دعم RTL الكامل (dir="rtl") للغة العربية.
+      - حالات تحميل واضحة أثناء Polling كل 10 ثوانٍ.
+      - منع النقر المزدوج (debounce/disable) على زر القبض.
+      - التصميم يعمل بدون اتصال/شبكة ضعيفة.
+      - عدم ظهور أزرار غير مفعلة في الحالة الحالية (مثلاً: زر "بدأ التسوق" قبل قبول الطلب).
+
+  - path: "app/api/courier/**/*.ts"
+    instructions: |
+      راجع كمهندس أمان/خوادم. تحقق من:
+      - فقط دور COURIER يمكنه استدعاء /api/courier/* (Role check إلزامي).
+      - كل POST يقبل Idempotency-Key ويتعامل مع التكرار الآمن.
+      - Atomic Accept يستخدم Prisma $transaction + row lock، لا حلّين يفوزان.
+      - Assignment Timeout يُعيد الطلب للـ pool تلقائياً.
+      - لا يُعيد تعيين حالة الطلب إلا عبر lib/state-machine.ts.
+      - لا يُسجّل أي Sensitive Data (PII) في السجلات.
+
   - path: "prisma/**/*.prisma"
     instructions: |
       راجع هذا الملف بصفتك خبيراً في Prisma. تحقق من:
