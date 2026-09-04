@@ -178,13 +178,13 @@ export async function updateCourierStatus(
 ): Promise<void> {
   if (input.status === CourierStatus.AVAILABLE || input.status === CourierStatus.OFFLINE) {
     await prisma.$transaction(async (tx) => {
-      const profile = await tx.$queryRaw<{ id: string }>`
+      const profile = await tx.$queryRaw<{ id: string }[]>`
         SELECT id FROM "CourierProfile" WHERE "userId" = ${userId} FOR UPDATE
       `
-      if (!profile) {
+      if (!profile || profile.length === 0) {
         throw new Error("الملف الشخصي للمندوب غير موجود")
       }
-      const profileId = profile.id
+      const profileId = profile[0].id
 
       const activeOrder = await tx.order.findFirst({
         where: {
@@ -230,13 +230,13 @@ export async function acceptOrder(
 
   try {
     const result = await prisma.$transaction(async (tx) => {
-      const profile = await tx.$queryRaw<{ id: string; status: string }>`
+      const profile = await tx.$queryRaw<{ id: string; status: string }[]>`
         SELECT id, status FROM "CourierProfile" WHERE "userId" = ${courierUserId} FOR UPDATE
       `
-      if (!profile) {
+      if (!profile || profile.length === 0) {
         throw new Error("الملف الشخصي للمندوب غير موجود")
       }
-      const profileData = profile
+      const profileData = profile[0]
 
       if (profileData.status === CourierStatus.OFFLINE) {
         throw new Error("المندوب غير متصل")

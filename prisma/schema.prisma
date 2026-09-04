@@ -312,7 +312,7 @@ model IdempotencyRecord {
   id          String   @id @default(cuid())
   key         String
   operation   String
-  userId      String?
+  userId      String
   resourceId  String?
   response    Json?
   createdAt   DateTime @default(now())
