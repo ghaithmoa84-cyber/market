@@ -45,7 +45,7 @@ export async function recordIdempotencyResult(
   resourceId: string,
   response: unknown,
   tx: Prisma.TransactionClient,
-  userId?: string
+  userId: string
 ): Promise<void> {
   await tx.idempotencyRecord.create({
     data: {
