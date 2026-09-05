@@ -310,12 +310,12 @@ enum OrderEventType {
 
 model IdempotencyRecord {
   id          String   @id @default(cuid())
-  key         String   @unique
+  key         String
   operation   String
-  userId      String?
+  userId      String
   resourceId  String?
   response    Json?
   createdAt   DateTime @default(now())
 
-  @@index([userId, operation])
+  @@unique([key, userId, operation])
 }

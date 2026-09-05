@@ -18,10 +18,16 @@ export function isUniqueViolation(err: unknown): boolean {
 
 // التحقق: إرجاع النتيجة إذا سبق تنفيذها بنجاح (Idempotency Replay).
 export async function findIdempotentResult(
-  idempotencyKey: string
+  idempotencyKey: string,
+  userId?: string,
+  operation?: string
 ): Promise<IdempotentResult | null> {
-  const record = await prisma.idempotencyRecord.findUnique({
-    where: { key: idempotencyKey },
+  const record = await prisma.idempotencyRecord.findFirst({
+    where: {
+      key: idempotencyKey,
+      ...(userId ? { userId } : {}),
+      ...(operation ? { operation } : {}),
+    },
     select: { resourceId: true, response: true },
   })
   if (!record) return null
@@ -39,7 +45,7 @@ export async function recordIdempotencyResult(
   resourceId: string,
   response: unknown,
   tx: Prisma.TransactionClient,
-  userId?: string
+  userId: string
 ): Promise<void> {
   await tx.idempotencyRecord.create({
     data: {

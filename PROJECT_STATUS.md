@@ -4,7 +4,8 @@
 Sprint 1 — Foundation & Security (مكتمل ✅)
 Sprint 2 — Products & Search (مكتمل ✅)
 Sprint 3 — Cart & Orders (مكتمل ✅)
-Sprint 4 — Courier (قيد التنفيذ)
+Sprint 4 — Courier (مكتمل ✅)
+Sprint 5 — Alternatives & Weighted Items (قيد التنفيذ)
 
 ## ما اكتمل حتى الآن
 - [x] تهيئة المشروع: Next.js 16.x, TypeScript strict, Tailwind 4
@@ -28,16 +29,12 @@ Sprint 4 — Courier (قيد التنفيذ)
 - [x] Sprint 3: lib/services/order-service.ts — إنشاء الطلب (Order + OrderStores + OrderItems + OrderEvents) في Transaction واحدة، DRAFT→PENDING عبر State Machine، Idempotent
 - [x] Sprint 3: lib/services/pricing-service.ts — حساب السعر على الخادم (Server is source of truth)
 - [x] Sprint 3: lib/validations/order.ts — Zod schemas (cartItem, createOrder, createAddress)
-
-## ما تبقى في Sprint 3
-- [ ] app/api/orders/route.ts — POST إنشاء طلب Idempotent
-- [ ] app/api/orders/[id]/route.ts — GET حالة الطلب
-- [ ] app/api/addresses/route.ts — CRUD العناوين
-- [ ] app/(customer)/cart/page.tsx
-- [ ] app/(customer)/orders/page.tsx
-- [ ] app/(customer)/orders/[id]/page.tsx
-- [ ] Done Criteria كاملة
-- [ ] اختبارات Sprint 3
+- [x] Sprint 3: app/api/orders/route.ts — POST إنشاء طلب Idempotent
+- [x] Sprint 3: app/api/orders/[id]/route.ts — GET حالة الطلب
+- [x] Sprint 3: app/api/addresses/route.ts — CRUD العناوين
+- [x] Sprint 3: app/(customer)/cart/page.tsx
+- [x] Sprint 3: app/(customer)/orders/page.tsx
+- [x] Sprint 3: app/(customer)/orders/[id]/page.tsx
 
 ## Sprints القادمة
 - Sprint 4: Courier

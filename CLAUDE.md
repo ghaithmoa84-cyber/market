@@ -66,9 +66,10 @@ Mobile-first
 
 ## بعد كل تنفيذ يجب أن تفعل
 
-1. شغّل: `npx tsc --noEmit`
-2. شغّل: `npm run build`
-3. أصلح كل الأخطاء
+1. شغّل: `npx --no-install tsc --noEmit`
+2. شغّل: `npm run lint`
+3. شغّل: `npm run build`
+4. أصلح كل الأخطاء
 4. قدم قائمة الملفات التي تغيرت
 5. قدم Done Criteria مع ✅ أو ❌ لكل بند
 6. لا تقل إن العمل مكتمل إذا فشل أي بند
@@ -77,5 +78,5 @@ Mobile-first
 
 ## Sprint الحالي
 
-**Sprint 1 — Foundation & Security**
-التفاصيل الكاملة في ملف: `Sprint 1 Brief.md`
+**Sprint 5 — Alternatives & Weighted Items**
+التفاصيل الكاملة في ملف: `Sprint 5 Brief.md`
