@@ -29,29 +29,16 @@ Sprint 5 — Alternatives & Weighted Items (قيد التنفيذ)
 - [x] Sprint 3: lib/services/order-service.ts — إنشاء الطلب (Order + OrderStores + OrderItems + OrderEvents) في Transaction واحدة، DRAFT→PENDING عبر State Machine، Idempotent
 - [x] Sprint 3: lib/services/pricing-service.ts — حساب السعر على الخادم (Server is source of truth)
 - [x] Sprint 3: lib/validations/order.ts — Zod schemas (cartItem, createOrder, createAddress)
-
-## Sprint 4 — Courier (مكتمل ✅)
-- [x] Prisma Schema جاهز (OrderStatus, CourierStatus, OrderEvent, IdempotencyRecord)
-- [x] lib/services/courier-service.ts — getAvailableOrders, acceptOrder (Atomic), updateCourierStatus, transitionOrderStatus
-- [x] API routes: /api/courier/*
-- [x] Courier UI: Online/Offline, Available/Busy, orders list, order details
-- [x] اختبارات التزامن (Atomic Accept) — 16/16 نجح
-- [x] CodeRabbit review + PR
-
-## Sprint 5 — Alternatives & Weighted Items (قيد التنفيذ)
-
-## البنية التحتية للمراجعة (مضافة في Sprint 4)
-- `.coderabbit.yaml` — مراجعة صارمة على الأمان والماليات (`request_changes_workflow: true`، `tone_instructions` صارمة، `language: ar`)
-- `.kilo/command/pre-flight.md` — بوابة إلزامية قبل كل رفع (`tsc + build + lint + Done Criteria`)
-- `.kilo/command/code-review.md` — دليل دورة المراجعة الثنائية (VS Code + GitHub)
-- `.kilo/agent/reviewer.md` — وكيل مراجعة فرعي يكرر دور CodeRabbit ↔ Kilo حتى تنقضي Blockers
-- `.kilo/skills/coderabbit-review/SKILL.md` — مهارة مدمجة بالخطة الكاملة والقواعد الذهبية
-
-## قاعدة ذهبية من الآن
-قبل كل `git push`:
-شغّل `/pre-flight` أولاً — ثم افتح الـ PR واترك CodeRabbit يراجع السياق الكامل.
+- [x] Sprint 3: app/api/orders/route.ts — POST إنشاء طلب Idempotent
+- [x] Sprint 3: app/api/orders/[id]/route.ts — GET حالة الطلب
+- [x] Sprint 3: app/api/addresses/route.ts — CRUD العناوين
+- [x] Sprint 3: app/(customer)/cart/page.tsx
+- [x] Sprint 3: app/(customer)/orders/page.tsx
+- [x] Sprint 3: app/(customer)/orders/[id]/page.tsx
 
 ## Sprints القادمة
+- Sprint 4: Courier
+- Sprint 5: Alternatives & Weighted Items
 - Sprint 6: Delivery & Finance
 - Sprint 7: Full Admin
 - Sprint 8: QA & Production
@@ -70,7 +57,7 @@ Sprint 5 — Alternatives & Weighted Items (قيد التنفيذ)
 ## ملفات المرجع
 - `Yalla Market Finder.docx` — رؤية المشروع والقرارات التشغيلية
 - `MVP Technical Specification V1.1.docx` — المرجع التقني الكامل
-- `Sprint 4 Brief.md` — تفاصيل Sprint الحالي
+- `Sprint 3 Brief.md` — تفاصيل Sprint الحالي
 - `CLAUDE.md` — قواعد العمل الدائمة
 
 ## تعليمات لأي محادثة جديدة
