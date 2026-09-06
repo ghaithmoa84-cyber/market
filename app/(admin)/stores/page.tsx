@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Button, Input, Label } from "@/components/ui/button"
 
 const createStoreSchema = {
@@ -25,7 +25,7 @@ export default function AdminStoresPage() {
   const [phone, setPhone] = useState("")
   const [formError, setFormError] = useState<string | null>(null)
 
-  const fetchStores = async () => {
+  const fetchStores = useCallback(async () => {
     setLoading(true)
     try {
       const res = await fetch("/api/admin?resource=stores")
@@ -38,11 +38,14 @@ export default function AdminStoresPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    fetchStores()
-  }, [])
+    const id = setTimeout(() => {
+      fetchStores()
+    }, 0)
+    return () => clearTimeout(id)
+  }, [fetchStores])
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()

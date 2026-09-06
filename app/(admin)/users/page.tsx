@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Button, Input, Label } from "@/components/ui/button"
 import { z } from "zod"
 
@@ -32,7 +32,7 @@ export default function AdminUsersPage() {
   const [vehicleType, setVehicleType] = useState("")
   const [formError, setFormError] = useState<string | null>(null)
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true)
     try {
       const res = await fetch("/api/admin?resource=users")
@@ -45,11 +45,14 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    const id = setTimeout(() => {
+      fetchUsers()
+    }, 0)
+    return () => clearTimeout(id)
+  }, [fetchUsers])
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()

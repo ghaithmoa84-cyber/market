@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { transitionOrderStatus } from "@/lib/services/courier-service"
 
 interface OrderEvent {
   id: string

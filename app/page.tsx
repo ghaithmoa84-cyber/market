@@ -26,9 +26,6 @@ export default async function HomePage() {
   }
 
   const role = session.user?.role
-  let dashboardHref = "/"
-
-  if (role === "ADMIN") dashboardHref = "/admin"
 
   return (
     <div className="min-h-screen bg-gray-50 p-4" dir="rtl">

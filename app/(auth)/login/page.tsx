@@ -9,7 +9,6 @@ const phoneSchema = z.string().min(1, "يجب إدخال رقم الهاتف")
 const passwordSchema = z.string().min(1, "يجب إدخال كلمة المرور")
 
 function LoginForm({ onSuccess }: { onSuccess: (url: string) => void }) {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const [phone, setPhone] = useState("")
   const [password, setPassword] = useState("")

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
@@ -50,6 +51,7 @@ interface AvailableOrder {
 }
 
 export default function CourierOrdersPage() {
+  const router = useRouter()
   const [orders, setOrders] = useState<AvailableOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -74,9 +76,14 @@ export default function CourierOrdersPage() {
   }, [])
 
   useEffect(() => {
-    fetchOrders()
+    const id = setTimeout(() => {
+      fetchOrders()
+    }, 0)
     const interval = setInterval(fetchOrders, 10000)
-    return () => clearInterval(interval)
+    return () => {
+      clearTimeout(id)
+      clearInterval(interval)
+    }
   }, [fetchOrders])
 
   const handleAccept = async (orderId: string) => {
@@ -94,7 +101,7 @@ export default function CourierOrdersPage() {
       if (res.ok) {
         const data = await res.json()
         if (data.order) {
-          window.location.href = `/courier/orders/${data.order.orderId}`
+          router.push(`/courier/orders/${data.order.orderId}`)
         }
       } else {
         const data = await res.json()

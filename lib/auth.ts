@@ -4,24 +4,6 @@ import bcryptjs from "bcryptjs"
 import { z } from "zod"
 import prisma from "@/lib/prisma"
 
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id?: string
-      name?: string | null
-      email?: string | null
-      image?: string | null
-      role?: string
-      phone?: string
-    }
-  }
-  interface JWT {
-    role?: string
-    id?: string
-    phone?: string
-  }
-}
-
 const credentialsSchema = z.object({
   phone: z.string().min(1, "يجب إدخال رقم الهاتف"),
   password: z.string().min(1, "يجب إدخال كلمة المرور"),
@@ -39,7 +21,7 @@ export const authConfig = {
         phone: { label: "رقم الهاتف", type: "tel" },
         password: { label: "كلمة المرور", type: "password" },
       },
-      async authorize(credentials, req) {
+      async authorize(_req: unknown, credentials) {
         try {
           const parsed = credentialsSchema.safeParse(credentials)
           if (!parsed.success) {
@@ -82,6 +64,7 @@ export const authConfig = {
             name: user.name,
             phone: user.phone,
             role: user.role,
+            isActive: user.isActive,
           }
         } catch (err) {
           console.error("Authorize error:", err)
@@ -100,8 +83,10 @@ export const authConfig = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as { role?: string }).role ?? undefined
+        token.role = (user as { role?: string }).role ?? token.role
         token.id = (user as { id?: string }).id ?? token.id
+        token.isActive = (user as { isActive?: boolean }).isActive ?? token.isActive
+        token.phone = (user as { phone?: string }).phone ?? token.phone
       }
       return token
     },
@@ -111,8 +96,9 @@ export const authConfig = {
         session.user = {
           ...baseUser,
           id: (token.id ?? baseUser.id) as string,
-          role: (token.role ?? baseUser.role) as string | undefined,
+          role: (token.role ?? baseUser.role) as string,
           phone: (token.phone ?? baseUser.phone) as string | undefined,
+          isActive: (token.isActive ?? baseUser.isActive) as boolean,
         }
       }
       return session

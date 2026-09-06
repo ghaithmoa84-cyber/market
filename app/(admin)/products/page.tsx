@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Button, Input, Label } from "@/components/ui/button"
 
 type Category = {
@@ -31,13 +31,6 @@ type Store = {
   name: string
 }
 
-type PriceHistoryEntry = {
-  id: string
-  price: number
-  recordedAt: string
-  changedById?: string | null
-}
-
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -61,7 +54,7 @@ export default function AdminProductsPage() {
   const [updatePrice, setUpdatePrice] = useState("")
   const [updateError, setUpdateError] = useState<string | null>(null)
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
     try {
       const [productsRes, categoriesRes, storesRes] = await Promise.all([
@@ -73,9 +66,9 @@ export default function AdminProductsPage() {
       if (productsRes.ok) {
         const data = await productsRes.json()
         setProducts(
-          (data.products || []).map((p: any) => ({
+          (data.products || []).map((p: { storeProducts?: unknown[] }) => ({
             ...p,
-            storeProducts: p.storeProducts || [],
+            storeProducts: Array.isArray(p.storeProducts) ? p.storeProducts : [],
           }))
         )
       }
@@ -92,11 +85,14 @@ export default function AdminProductsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    const id = setTimeout(() => {
+      fetchData()
+    }, 0)
+    return () => clearTimeout(id)
+  }, [fetchData])
 
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault()

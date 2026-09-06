@@ -3,7 +3,6 @@ import {
   CourierStatus,
   OrderActorType,
   OrderEventType,
-  Prisma,
 } from "@prisma/client"
 import prisma from "@/lib/prisma"
 import { assertTransition } from "@/lib/state-machine"
