@@ -1,13 +1,12 @@
 # Yalla Market — Project Status
 
 ## Sprint الحالي
-Sprint 1 — Foundation & Security (مكتمل ✅)
-Sprint 2 — Products & Search (مكتمل ✅)
-Sprint 3 — Cart & Orders (مكتمل ✅)
-Sprint 4 — Courier (مكتمل ✅)
-Sprint 5 — Alternatives & Weighted Items (قيد التنفيذ)
+Sprint 6 — Delivery & Finance (قيد التنفيذ)
 
 ## ما اكتمل حتى الآن
+- [x] Sprint 5: PR #4 مدمج على master (commit: 1b77920)
+- [x] Sprint 5: مراجعة CodeRabbit كاملة — كل الـ Blockers معالجة
+- [x] Sprint 5: Migration sprint5_complete — كل جداول المشروع موثقة
 - [x] تهيئة المشروع: Next.js 16.x, TypeScript strict, Tailwind 4
 - [x] Prisma Schema كامل (User, CustomerProfile, CourierProfile, Store, StoreHours, Category, Product, StoreProduct, PriceHistory, SearchLog)
 - [x] lib/config.ts — Config module موحد
@@ -37,11 +36,12 @@ Sprint 5 — Alternatives & Weighted Items (قيد التنفيذ)
 - [x] Sprint 3: app/(customer)/orders/[id]/page.tsx
 
 ## Sprints القادمة
-- Sprint 4: Courier
-- Sprint 5: Alternatives & Weighted Items
-- Sprint 6: Delivery & Finance
 - Sprint 7: Full Admin
 - Sprint 8: QA & Production
+
+## ملاحظات مؤجلة لما بعد Sprint 8
+- دمج منطق SHOPPING في دالة مشتركة (alternative-service + pricing-service)
+- تغطية Docstrings (حالياً 13% — الهدف 80% في Sprint 8)
 
 ## القرارات الثابتة التي لا تتغير
 - Server هو مصدر الحقيقة دائماً
