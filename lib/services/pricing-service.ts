@@ -116,6 +116,7 @@ export async function recordActualItem(
           id: itemId,
           orderId,
           status: ItemStatus.PENDING,
+          actualPrice: null,
         },
         data: {
           actualQty: actualQtyDecimal,
@@ -171,7 +172,7 @@ export async function recordActualItem(
         data.idempotencyKey,
         "RECORD_ACTUAL_ITEM",
         itemId,
-        { requiresApproval: true },
+        { orderItem: updatedItem, requiresApproval: true },
         tx,
         courierId
       )
@@ -184,6 +185,7 @@ export async function recordActualItem(
         id: itemId,
         orderId,
         status: ItemStatus.PENDING,
+        actualPrice: null,
       },
       data: {
         actualQty: actualQtyDecimal,
@@ -216,7 +218,7 @@ export async function recordActualItem(
       data.idempotencyKey,
       "RECORD_ACTUAL_ITEM",
       itemId,
-      { requiresApproval: false },
+      { orderItem: updatedItem, requiresApproval: false },
       tx,
       courierId
     )

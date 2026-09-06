@@ -33,7 +33,10 @@ export async function findIdempotentResult(
   if (!record) return null
   return {
     resourceId: record.resourceId,
-    response: record.response as string,
+    response:
+      typeof record.response === "string"
+        ? record.response
+        : JSON.stringify(record.response),
   }
 }
 
