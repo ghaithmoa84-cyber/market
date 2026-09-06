@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma"
 
 export interface IdempotentResult {
   resourceId: string | null
-  response: unknown
+  response: string
 }
 
 // يكتشف ازدواجية المفاتيح (P2002) التي يرميها Prisma عند الـunique constraint.
@@ -33,7 +33,10 @@ export async function findIdempotentResult(
   if (!record) return null
   return {
     resourceId: record.resourceId,
-    response: record.response,
+    response:
+      typeof record.response === "string"
+        ? record.response
+        : JSON.stringify(record.response),
   }
 }
 
@@ -53,7 +56,7 @@ export async function recordIdempotencyResult(
       operation,
       userId,
       resourceId,
-      response: response as Prisma.InputJsonValue,
+      response: JSON.stringify(response),
     },
   })
 }

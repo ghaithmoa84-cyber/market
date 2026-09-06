@@ -4,7 +4,7 @@ import { getAvailableOrders } from "@/lib/services/courier-service"
 
 export const dynamic = "force-dynamic"
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   const session = await auth()
   if (!session?.user) {
     return NextResponse.json({ error: "غير مصرح لك" }, { status: 401 })

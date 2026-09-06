@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Button, Input, Label } from "@/components/ui/button"
 
 type Category = {
@@ -16,7 +16,7 @@ export default function AdminCategoriesPage() {
   const [name, setName] = useState("")
   const [formError, setFormError] = useState<string | null>(null)
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     setLoading(true)
     try {
       const res = await fetch("/api/admin?resource=categories")
@@ -29,11 +29,14 @@ export default function AdminCategoriesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    fetchCategories()
-  }, [])
+    const id = setTimeout(() => {
+      fetchCategories()
+    }, 0)
+    return () => clearTimeout(id)
+  }, [fetchCategories])
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()

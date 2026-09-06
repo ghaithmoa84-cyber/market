@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button, Input } from "@/components/ui/button"
 
 interface Address {
@@ -25,6 +26,7 @@ interface CartItem {
 }
 
 export default function CartPage() {
+  const router = useRouter()
   const [items, setItems] = useState<CartItem[]>([])
   const [addresses, setAddresses] = useState<Address[]>([])
   const [selectedAddressId, setSelectedAddressId] = useState<string>("")
@@ -147,7 +149,7 @@ export default function CartPage() {
       setSuccess("تم إنشاء الطلب بنجاح")
       setItems([])
       setTimeout(() => {
-        window.location.href = `/orders/${data.order.orderId}`
+        router.push(`/orders/${data.order.orderId}`)
       }, 1000)
     } catch {
       setError("حدث خطأ في الاتصال")

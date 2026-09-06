@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, Suspense } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button, Input, Label } from "@/components/ui/button"
 
@@ -25,7 +25,6 @@ interface SearchResult {
 }
 
 function SearchContent() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const initialQuery = searchParams.get("q") || ""
 

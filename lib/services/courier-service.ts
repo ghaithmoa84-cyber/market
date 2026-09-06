@@ -3,7 +3,6 @@ import {
   CourierStatus,
   OrderActorType,
   OrderEventType,
-  Prisma,
 } from "@prisma/client"
 import prisma from "@/lib/prisma"
 import { assertTransition } from "@/lib/state-machine"
@@ -225,7 +224,7 @@ export async function acceptOrder(
 ): Promise<AcceptOrderResult> {
   const cached = await findIdempotentResult(input.idempotencyKey, courierUserId, "COURIER_ACCEPT_ORDER")
   if (cached) {
-    return cached.response as AcceptOrderResult
+    return JSON.parse(cached.response) as unknown as AcceptOrderResult
   }
 
   try {
@@ -314,7 +313,7 @@ export async function acceptOrder(
     if (isUniqueViolation(err)) {
       for (let attempt = 0; attempt < 6; attempt++) {
         const won = await findIdempotentResult(input.idempotencyKey, courierUserId, "COURIER_ACCEPT_ORDER")
-        if (won) return won.response as AcceptOrderResult
+        if (won) return JSON.parse(won.response) as unknown as AcceptOrderResult
         await new Promise((resolve) => setTimeout(resolve, 50))
       }
     }
@@ -328,7 +327,7 @@ export async function transitionOrderStatus(
 ): Promise<TransitionResult> {
   const cached = await findIdempotentResult(input.idempotencyKey, courierUserId, `COURIER_TRANSITION_${input.to}`)
   if (cached) {
-    return cached.response as TransitionResult
+    return JSON.parse(cached.response) as unknown as TransitionResult
   }
 
   const profile = await prisma.courierProfile.findUnique({
@@ -405,7 +404,7 @@ export async function transitionOrderStatus(
     if (isUniqueViolation(err)) {
       for (let attempt = 0; attempt < 6; attempt++) {
         const won = await findIdempotentResult(input.idempotencyKey, courierUserId, `COURIER_TRANSITION_${input.to}`)
-        if (won) return won.response as TransitionResult
+        if (won) return JSON.parse(won.response) as unknown as TransitionResult
         await new Promise((resolve) => setTimeout(resolve, 50))
       }
     }

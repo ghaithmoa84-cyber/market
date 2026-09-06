@@ -19,6 +19,7 @@ model User {
 
   customer     CustomerProfile?
   courier      CourierProfile?
+  notifications Notification[]
 }
 
 enum Role {
@@ -243,6 +244,7 @@ model OrderItem {
   updatedAt      DateTime @updatedAt
 
   @@index([orderId])
+  alternatives  Alternative[]
 }
 
 enum ItemUnit {
@@ -260,6 +262,13 @@ enum ItemStatus {
   CANCELLED
 }
 
+enum AltStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  TIMEOUT
+}
+
 model OrderEvent {
   id        String         @id @default(cuid())
   orderId   String
@@ -271,6 +280,21 @@ model OrderEvent {
   createdAt DateTime       @default(now())
 
   @@index([orderId, createdAt])
+}
+
+model Alternative {
+  id          String      @id @default(cuid())
+  orderItemId String
+  orderItem   OrderItem   @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  description String
+  price       Decimal     @db.Decimal(14, 2)
+  status      AltStatus   @default(PENDING)
+  expiresAt   DateTime?
+  respondedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([orderItemId])
 }
 
 enum OrderActorType {
@@ -318,4 +342,19 @@ model IdempotencyRecord {
   createdAt   DateTime @default(now())
 
   @@unique([key, userId, operation])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title      String
+  body       String
+  metadata  Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
 }
