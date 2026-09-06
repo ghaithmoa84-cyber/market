@@ -317,11 +317,12 @@ export async function respondToAlternative(
       price: true,
       expiresAt: true,
       respondedAt: true,
-      orderItem: {
-        select: {
-          id: true,
-          orderId: true,
-          order: {
+          orderItem: {
+            select: {
+              id: true,
+              orderId: true,
+              requestedQty: true,
+              order: {
             select: {
               customerId: true,
               status: true,
@@ -404,8 +405,8 @@ export async function respondToAlternative(
           data: {
             status: ItemStatus.SUBSTITUTED,
             actualPrice: currentAlternative.price,
-            actualQty: new Prisma.Decimal(1),
-            actualTotal: currentAlternative.price,
+            actualQty: alternative.orderItem.requestedQty,
+            actualTotal: currentAlternative.price.mul(alternative.orderItem.requestedQty),
           },
         })
 
