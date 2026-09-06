@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* eslint-disable @typescript-eslint/no-require-imports, no-console */
 const http = require('http');
 const fs = require('fs');
 

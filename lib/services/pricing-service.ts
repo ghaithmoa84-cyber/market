@@ -250,11 +250,15 @@ export async function respondToPriceApproval(
         id: itemId,
         orderId,
       },
-      select: { id: true, status: true },
+      select: { id: true, status: true, actualPrice: true },
     })
 
     if (!currentItem) {
       throw new ServiceError("العنصر غير موجود", 404)
+    }
+
+    if (currentItem.actualPrice === null) {
+      throw new ServiceError("لا يوجد سعر فعلي مسجل لهذا العنصر", 400)
     }
 
     if (data.decision === "APPROVE") {

@@ -352,7 +352,7 @@ export async function respondToAlternative(
     const result = await prisma.$transaction(async (tx) => {
       const currentAlternative = await tx.alternative.findUnique({
         where: { id: altId },
-        select: { status: true, orderItemId: true },
+      select: { status: true, orderItemId: true, price: true },
       })
 
       if (!currentAlternative || currentAlternative.status !== AltStatus.PENDING) {
@@ -401,7 +401,12 @@ export async function respondToAlternative(
 
         await tx.orderItem.update({
           where: { id: alternative.orderItem.id },
-          data: { status: ItemStatus.SUBSTITUTED },
+          data: {
+            status: ItemStatus.SUBSTITUTED,
+            actualPrice: currentAlternative.price,
+            actualQty: new Prisma.Decimal(1),
+            actualTotal: currentAlternative.price,
+          },
         })
 
         const pendingAlternatives = await tx.alternative.count({
