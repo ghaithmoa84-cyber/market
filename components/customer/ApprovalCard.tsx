@@ -21,6 +21,7 @@ export default function ApprovalCard({ type, orderId, itemId, altId, data, onRes
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
   const [decision, setDecision] = useState<"APPROVE" | "REJECT" | null>(null)
+  const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID())
 
   const handleRespond = async (d: "APPROVE" | "REJECT") => {
     setDecision(d)
@@ -37,12 +38,12 @@ export default function ApprovalCard({ type, orderId, itemId, altId, data, onRes
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           decision: d,
-          idempotencyKey: crypto.randomUUID(),
+          idempotencyKey: idempotencyKey,
         }),
       })
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || "فشت العملية")
+        throw new Error(data.error || "فشلت العملية")
       }
       onRespond()
     } catch (err) {
@@ -50,6 +51,7 @@ export default function ApprovalCard({ type, orderId, itemId, altId, data, onRes
     } finally {
       setSubmitting(false)
       setDecision(null)
+      setIdempotencyKey(crypto.randomUUID())
     }
   }
 

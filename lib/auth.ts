@@ -21,7 +21,7 @@ export const authConfig = {
         phone: { label: "رقم الهاتف", type: "tel" },
         password: { label: "كلمة المرور", type: "password" },
       },
-      async authorize(_req: unknown, credentials) {
+      async authorize(credentials) {
         try {
           const parsed = credentialsSchema.safeParse(credentials)
           if (!parsed.success) {

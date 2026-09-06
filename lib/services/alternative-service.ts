@@ -228,15 +228,22 @@ export async function proposeAlternative(
       })
 
       if (customer) {
-        await tx.notification.create({
-          data: {
-            userId: customer.customerId,
-            type: "ALTERNATIVE_PROPOSAL",
-            title: "اقتراح بديل للطلب",
-            body: "تم اقتراح عنصر بديل لطلبك، يرجى المراجعة والرد",
-            metadata: { orderId, alternativeId: alternative.id },
-          },
+        const customerProfile = await tx.customerProfile.findUnique({
+          where: { id: customer.customerId },
+          select: { userId: true },
         })
+
+        if (customerProfile) {
+          await tx.notification.create({
+            data: {
+              userId: customerProfile.userId,
+              type: "ALTERNATIVE_PROPOSAL",
+              title: "اقتراح بديل للطلب",
+              body: "تم اقتراح عنصر بديل لطلبك، يرجى المراجعة والرد",
+              metadata: { orderId, alternativeId: alternative.id },
+            },
+          })
+        }
       }
 
       const response: AlternativeResult = {
@@ -397,10 +404,20 @@ export async function respondToAlternative(
           data: { status: ItemStatus.SUBSTITUTED },
         })
 
-        await tx.order.update({
-          where: { id: alternative.orderItem.orderId },
-          data: { status: OrderStatus.SHOPPING },
+        const pendingAlternatives = await tx.alternative.count({
+          where: {
+            orderItem: { orderId: alternative.orderItem.orderId },
+            status: "PENDING",
+            id: { not: altId },
+          },
         })
+
+        if (pendingAlternatives === 0) {
+          await tx.order.update({
+            where: { id: alternative.orderItem.orderId },
+            data: { status: OrderStatus.SHOPPING },
+          })
+        }
 
         await tx.orderEvent.create({
           data: {
@@ -466,10 +483,20 @@ export async function respondToAlternative(
         data: { status: ItemStatus.UNAVAILABLE },
       })
 
-      await tx.order.update({
-        where: { id: alternative.orderItem.orderId },
-        data: { status: OrderStatus.SHOPPING },
+      const pendingAlternatives = await tx.alternative.count({
+        where: {
+          orderItem: { orderId: alternative.orderItem.orderId },
+          status: "PENDING",
+          id: { not: altId },
+        },
       })
+
+      if (pendingAlternatives === 0) {
+        await tx.order.update({
+          where: { id: alternative.orderItem.orderId },
+          data: { status: OrderStatus.SHOPPING },
+        })
+      }
 
       await tx.orderEvent.create({
         data: {

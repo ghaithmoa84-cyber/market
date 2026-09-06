@@ -136,15 +136,22 @@ export async function recordActualItem(
       })
 
       if (customer) {
-        await tx.notification.create({
-          data: {
-            userId: customer.customerId,
-            type: "PRICE_APPROVAL",
-            title: "طلب موافقة على السعر",
-            body: "تم تسجيل سعر مختلف لطلبك، يرجى المراجعة والموافقة",
-            metadata: { orderId, itemId },
-          },
+        const customerProfile = await tx.customerProfile.findUnique({
+          where: { id: customer.customerId },
+          select: { userId: true },
         })
+
+        if (customerProfile) {
+          await tx.notification.create({
+            data: {
+              userId: customerProfile.userId,
+              type: "PRICE_APPROVAL",
+              title: "طلب موافقة على السعر",
+              body: "تم تسجيل سعر مختلف لطلبك، يرجى المراجعة والموافقة",
+              metadata: { orderId, itemId },
+            },
+          })
+        }
       }
 
       await recordIdempotencyResult(
@@ -265,10 +272,28 @@ export async function respondToPriceApproval(
         data: { status: ItemStatus.PURCHASED },
       })
 
-      await tx.order.update({
-        where: { id: orderId, status: order.status },
-        data: { status: OrderStatus.SHOPPING },
+      const pendingAlternatives = await tx.alternative.count({
+        where: {
+          orderItem: { orderId },
+          status: "PENDING",
+        },
       })
+
+      const pendingPriceApprovals = await tx.orderItem.count({
+        where: {
+          orderId,
+          id: { not: itemId },
+          actualPrice: { not: null },
+          status: "PENDING",
+        },
+      })
+
+      if (pendingAlternatives === 0 && pendingPriceApprovals === 0) {
+        await tx.order.update({
+          where: { id: orderId, status: order.status },
+          data: { status: OrderStatus.SHOPPING },
+        })
+      }
 
       await tx.orderEvent.create({
         data: {
@@ -311,10 +336,28 @@ export async function respondToPriceApproval(
       },
     })
 
-    await tx.order.update({
-      where: { id: orderId, status: order.status },
-      data: { status: OrderStatus.SHOPPING },
+    const pendingAlternatives = await tx.alternative.count({
+      where: {
+        orderItem: { orderId },
+        status: "PENDING",
+      },
     })
+
+    const pendingPriceApprovals = await tx.orderItem.count({
+      where: {
+        orderId,
+        id: { not: itemId },
+        actualPrice: { not: null },
+        status: "PENDING",
+      },
+    })
+
+    if (pendingAlternatives === 0 && pendingPriceApprovals === 0) {
+      await tx.order.update({
+        where: { id: orderId, status: order.status },
+        data: { status: OrderStatus.SHOPPING },
+      })
+    }
 
     await tx.orderEvent.create({
       data: {

@@ -39,6 +39,8 @@ export default function OrderItemCard({ item, orderId, onUpdate }: OrderItemCard
   const [actualPrice, setActualPrice] = useState("")
   const [altDescription, setAltDescription] = useState("")
   const [altPrice, setAltPrice] = useState("")
+  const [actualIdempotencyKey, setActualIdempotencyKey] = useState(() => crypto.randomUUID())
+  const [altIdempotencyKey, setAltIdempotencyKey] = useState(() => crypto.randomUUID())
 
   const resetForms = () => {
     setShowActualForm(false)
@@ -47,6 +49,8 @@ export default function OrderItemCard({ item, orderId, onUpdate }: OrderItemCard
     setActualPrice("")
     setAltDescription("")
     setAltPrice("")
+    setActualIdempotencyKey(crypto.randomUUID())
+    setAltIdempotencyKey(crypto.randomUUID())
     setError("")
   }
 
@@ -60,7 +64,7 @@ export default function OrderItemCard({ item, orderId, onUpdate }: OrderItemCard
         body: JSON.stringify({
           actualQty: Number(actualQty),
           actualPrice: Number(actualPrice),
-          idempotencyKey: crypto.randomUUID(),
+          idempotencyKey: actualIdempotencyKey,
         }),
       })
       if (!res.ok) {
@@ -106,7 +110,7 @@ export default function OrderItemCard({ item, orderId, onUpdate }: OrderItemCard
         body: JSON.stringify({
           description: altDescription,
           price: Number(altPrice),
-          idempotencyKey: crypto.randomUUID(),
+          idempotencyKey: altIdempotencyKey,
         }),
       })
       if (!res.ok) {
