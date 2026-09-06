@@ -86,9 +86,22 @@ export async function markItemUnavailable(
   }
 
   const result = await prisma.$transaction(async (tx) => {
-    const updated = await tx.orderItem.update({
-      where: { id: itemId },
+    const updateResult = await tx.orderItem.updateMany({
+      where: {
+        id: itemId,
+        orderId,
+        status: ItemStatus.PENDING,
+      },
       data: { status: ItemStatus.UNAVAILABLE },
+    })
+
+    if (updateResult.count === 0) {
+      const item = await tx.orderItem.findUnique({ where: { id: itemId } })
+      return { id: item!.id, status: item!.status } as MarkUnavailableResult
+    }
+
+    const updated = await tx.orderItem.findUnique({
+      where: { id: itemId },
       select: { id: true, status: true },
     })
 
@@ -103,8 +116,8 @@ export async function markItemUnavailable(
     })
 
     return {
-      id: updated.id,
-      status: updated.status,
+      id: updated!.id,
+      status: updated!.status,
     } as MarkUnavailableResult
   })
 
@@ -125,7 +138,7 @@ export async function proposeAlternative(
     "PROPOSE_ALTERNATIVE"
   )
   if (cached) {
-    throw new ServiceError("العملية مكررة", 409)
+    return JSON.parse(cached.response)
   }
 
   const profile = await prisma.courierProfile.findUnique({
@@ -275,9 +288,7 @@ export async function proposeAlternative(
         courierUserId,
         "PROPOSE_ALTERNATIVE"
       )
-      if (won) {
-        throw new ServiceError("العملية مكررة", 409)
-      }
+      if (won?.response) return JSON.parse(won.response)
     }
     throw err
   }
@@ -296,7 +307,7 @@ export async function respondToAlternative(
     "RESPOND_ALTERNATIVE"
   )
   if (cached) {
-    throw new ServiceError("العملية مكررة", 409)
+    return JSON.parse(cached.response)
   }
 
   const profile = await prisma.customerProfile.findUnique({
@@ -418,7 +429,16 @@ export async function respondToAlternative(
           },
         })
 
-        if (pendingAlternatives === 0) {
+        const pendingPriceApprovals = await tx.orderItem.count({
+          where: {
+            orderId: alternative.orderItem.orderId,
+            actualPrice: { not: null },
+            status: ItemStatus.PENDING,
+            id: { not: alternative.orderItem.id },
+          },
+        })
+
+        if (pendingAlternatives === 0 && pendingPriceApprovals === 0) {
           await tx.order.update({
             where: { id: alternative.orderItem.orderId },
             data: { status: OrderStatus.SHOPPING },
@@ -497,7 +517,16 @@ export async function respondToAlternative(
         },
       })
 
-      if (pendingAlternatives === 0) {
+      const pendingPriceApprovals = await tx.orderItem.count({
+        where: {
+          orderId: alternative.orderItem.orderId,
+          actualPrice: { not: null },
+          status: ItemStatus.PENDING,
+          id: { not: alternative.orderItem.id },
+        },
+      })
+
+      if (pendingAlternatives === 0 && pendingPriceApprovals === 0) {
         await tx.order.update({
           where: { id: alternative.orderItem.orderId },
           data: { status: OrderStatus.SHOPPING },
@@ -543,9 +572,7 @@ export async function respondToAlternative(
         customerUserId,
         "RESPOND_ALTERNATIVE"
       )
-      if (won) {
-        throw new ServiceError("العملية مكررة", 409)
-      }
+      if (won?.response) return JSON.parse(won.response)
     }
     throw err
   }
@@ -591,15 +618,31 @@ export async function timeoutAlternative(altId: string): Promise<AlternativeResu
       throw new ServiceError("الاقتراح البديل لم يعد معلقاً", 409)
     }
 
-    assertTransition(
-      await tx.orderItem
-        .findUnique({
-          where: { id: alternative.orderItem.id },
-          select: { order: { select: { status: true } } },
-        })
-        .then((item) => item?.order.status ?? OrderStatus.CANCELLED),
-      OrderStatus.SHOPPING
-    )
+    const orderItem = await tx.orderItem.findUnique({
+      where: { id: alternative.orderItem.id },
+      select: { id: true, status: true },
+    })
+
+    if (!orderItem) {
+      throw new ServiceError("العنصر المرتبط بالبديل غير موجود", 404)
+    }
+
+    try {
+      assertTransition(
+        (await tx.order
+          .findUnique({
+            where: { id: alternative.orderItem.orderId },
+            select: { status: true },
+          })
+          .then((o) => o?.status ?? OrderStatus.CANCELLED)),
+        OrderStatus.SHOPPING
+      )
+    } catch (err) {
+      if (err instanceof OrderStateError) {
+        throw new ServiceError("حالة الطلب غير صالحة للانتقال", 400)
+      }
+      throw err
+    }
 
     const updatedAlternative = await tx.alternative.update({
       where: { id: altId },
@@ -621,10 +664,20 @@ export async function timeoutAlternative(altId: string): Promise<AlternativeResu
       data: { status: ItemStatus.UNAVAILABLE },
     })
 
-    await tx.order.update({
-      where: { id: alternative.orderItem.orderId },
-      data: { status: OrderStatus.SHOPPING },
+    const pendingAlternatives = await tx.alternative.count({
+      where: {
+        orderItem: { orderId: alternative.orderItem.orderId },
+        status: "PENDING",
+        id: { not: altId },
+      },
     })
+
+    if (pendingAlternatives === 0) {
+      await tx.order.update({
+        where: { id: alternative.orderItem.orderId },
+        data: { status: OrderStatus.SHOPPING },
+      })
+    }
 
     await tx.orderEvent.create({
       data: {

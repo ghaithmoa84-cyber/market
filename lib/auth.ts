@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials"
 import bcryptjs from "bcryptjs"
 import { z } from "zod"
 import prisma from "@/lib/prisma"
+import type { Role } from "@prisma/client"
 
 const credentialsSchema = z.object({
   phone: z.string().min(1, "يجب إدخال رقم الهاتف"),
@@ -83,7 +84,7 @@ export const authConfig = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as { role?: string }).role ?? token.role
+        token.role = (user as { role?: Role }).role ?? token.role
         token.id = (user as { id?: string }).id ?? token.id
         token.isActive = (user as { isActive?: boolean }).isActive ?? token.isActive
         token.phone = (user as { phone?: string }).phone ?? token.phone
@@ -96,7 +97,7 @@ export const authConfig = {
         session.user = {
           ...baseUser,
           id: (token.id ?? baseUser.id) as string,
-          role: (token.role ?? baseUser.role) as string,
+          role: (token.role ?? baseUser.role) as Role,
           phone: (token.phone ?? baseUser.phone) as string | undefined,
           isActive: (token.isActive ?? baseUser.isActive) as boolean,
         }

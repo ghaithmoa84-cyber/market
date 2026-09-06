@@ -19,6 +19,7 @@ model User {
 
   customer     CustomerProfile?
   courier      CourierProfile?
+  notifications Notification[]
 }
 
 enum Role {
@@ -344,8 +345,9 @@ model IdempotencyRecord {
 }
 
 model Notification {
-  id        String   @id @default(cuid())
+  id        String           @id @default(cuid())
   userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      String
   title      String
   body       String

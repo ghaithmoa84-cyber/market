@@ -21,7 +21,16 @@ export async function POST(
 
     const { altId } = await params
 
-    const body = await request.json()
+    let body: unknown
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json(
+        { error: "طلب غير صالح — تعذّر قراءة البيانات" },
+        { status: 400 }
+      )
+    }
+
     const parsed = alternativeResponseSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(

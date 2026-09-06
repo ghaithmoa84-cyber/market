@@ -47,7 +47,7 @@ export async function recordActualItem(
     "RECORD_ACTUAL_ITEM"
   )
   if (cached) {
-    throw new ServiceError("العملية مكررة", 409)
+    return JSON.parse(cached.response)
   }
 
   const profile = await prisma.courierProfile.findUnique({
@@ -111,14 +111,27 @@ export async function recordActualItem(
         data: { status: OrderStatus.WAITING_CUSTOMER_APPROVAL },
       })
 
-      const updatedItem = await tx.orderItem.update({
-        where: { id: itemId },
+      const updateResult = await tx.orderItem.updateMany({
+        where: {
+          id: itemId,
+          orderId,
+          status: ItemStatus.PENDING,
+        },
         data: {
           actualQty: actualQtyDecimal,
           actualPrice: actualPriceDecimal,
           actualTotal: actualTotal,
         },
       })
+
+      if (updateResult.count === 0) {
+        const item = await tx.orderItem.findUnique({ where: { id: itemId } })
+        return { orderItem: item!, requiresApproval: false }
+      }
+
+      const updatedItem = await tx.orderItem.findUnique({
+        where: { id: itemId },
+      }) as OrderItem
 
       await tx.orderEvent.create({
         data: {
@@ -166,8 +179,12 @@ export async function recordActualItem(
       return { orderItem: updatedItem, requiresApproval: true }
     }
 
-    const updatedItem = await tx.orderItem.update({
-      where: { id: itemId },
+    const updateResult = await tx.orderItem.updateMany({
+      where: {
+        id: itemId,
+        orderId,
+        status: ItemStatus.PENDING,
+      },
       data: {
         actualQty: actualQtyDecimal,
         actualPrice: actualPriceDecimal,
@@ -175,6 +192,15 @@ export async function recordActualItem(
         status: ItemStatus.PURCHASED,
       },
     })
+
+    if (updateResult.count === 0) {
+      const item = await tx.orderItem.findUnique({ where: { id: itemId } })
+      return { orderItem: item!, requiresApproval: false }
+    }
+
+    const updatedItem = await tx.orderItem.findUnique({
+      where: { id: itemId },
+    }) as OrderItem
 
     await tx.orderEvent.create({
       data: {
@@ -195,7 +221,7 @@ export async function recordActualItem(
       courierId
     )
 
-    return { orderItem: updatedItem, requiresApproval: false }
+    return { orderItem: updatedItem as OrderItem, requiresApproval: false }
   })
 
   return result
@@ -216,7 +242,7 @@ export async function respondToPriceApproval(
     "RESPOND_TO_PRICE_APPROVAL"
   )
   if (cached) {
-    throw new ServiceError("العملية مكررة", 409)
+    return JSON.parse(cached.response)
   }
 
   const profile = await prisma.customerProfile.findUnique({
