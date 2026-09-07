@@ -50,8 +50,8 @@ export default function AdminSettlementsPage() {
   const [settleError, setSettleError] = useState<string | null>(null)
   const [settleBatchId, setSettleBatchId] = useState<string | null>(null)
 
-  const fetchSettlements = useCallback(async () => {
-    setLoading(true)
+  const fetchSettlements = useCallback(async (isInitial = false) => {
+    if (isInitial) setLoading(true)
     setError(null)
     try {
       const res = await fetch("/api/admin/settlements")
@@ -64,7 +64,7 @@ export default function AdminSettlementsPage() {
     } catch {
       setError("حدث خطأ في الاتصال")
     } finally {
-      setLoading(false)
+      if (isInitial) setLoading(false)
     }
   }, [])
 
@@ -82,7 +82,7 @@ export default function AdminSettlementsPage() {
 
   useEffect(() => {
     const id = setTimeout(() => {
-      fetchSettlements()
+      fetchSettlements(true)
       fetchCouriers()
     }, 0)
     return () => clearTimeout(id)
@@ -90,7 +90,7 @@ export default function AdminSettlementsPage() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchSettlements()
+      fetchSettlements(false)
     }, 30000)
     return () => clearInterval(interval)
   }, [fetchSettlements])
@@ -188,6 +188,10 @@ export default function AdminSettlementsPage() {
     SETTLED: "مسوّى",
   }
 
+  if (loading) {
+    return <div className="p-6 text-gray-600">جاري التحميل...</div>
+  }
+
   return (
     <div className="space-y-6" dir="rtl">
       <div className="flex items-center justify-between">
@@ -272,13 +276,7 @@ export default function AdminSettlementsPage() {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={6} className="text-center p-6 text-gray-500">
-                  جار التحميل...
-                </td>
-              </tr>
-            ) : batches.length === 0 ? (
+            {batches.length === 0 ? (
               <tr>
                 <td colSpan={6} className="text-center p-6 text-gray-500">
                   لا توجد تسويات
@@ -315,7 +313,7 @@ export default function AdminSettlementsPage() {
                     </span>
                   </td>
                   <td className="p-3">
-                    {batch.status === "PENDING" && (
+                    {(batch.status === "PENDING" || batch.status === "PARTIAL") && (
                       <Button
                         size="sm"
                         variant="secondary"

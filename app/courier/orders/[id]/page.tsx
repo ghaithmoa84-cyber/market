@@ -102,6 +102,7 @@ export default function CourierOrderDetailPage({
   const [transitioning, setTransitioning] = useState(false)
   const [orderId, setOrderId] = useState("")
   const [delivering, setDelivering] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
     params.then((p) => setOrderId(p.id))
@@ -159,7 +160,7 @@ export default function CourierOrderDetailPage({
   const handleDeliver = async () => {
     if (!order) return
     setDelivering(true)
-    setError("")
+    setActionError(null)
     try {
       const res = await fetch(`/api/orders/${order.id}/deliver`, {
         method: "POST",
@@ -174,7 +175,7 @@ export default function CourierOrderDetailPage({
         setError(data.error || "فشل تسجيل التسليم")
       }
     } catch {
-      setError("خطأ في الاتصال")
+      setActionError("حدث خطأ في الاتصال")
     } finally {
       setDelivering(false)
     }
@@ -340,6 +341,9 @@ export default function CourierOrderDetailPage({
           >
             {delivering ? "جاري التسجيل..." : "تم التسليم"}
           </Button>
+          {actionError && (
+            <p className="text-red-600 text-sm mt-2">{actionError}</p>
+          )}
         </div>
       )}
     </div>

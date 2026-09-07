@@ -59,6 +59,7 @@ export default function CustomerOrderDetailPage({
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   const fetchOrder = useCallback(async () => {
     setLoading(true)
@@ -91,7 +92,7 @@ export default function CustomerOrderDetailPage({
   }, [fetchOrder])
 
   useEffect(() => {
-    const FINAL_STATUSES = ["SETTLED", "CANCELLED", "CONFIRMED"]
+    const FINAL_STATUSES = ["SETTLED", "CANCELLED", "CONFIRMED", "SETTLEMENT_PENDING"]
     if (!order) return
 
     if (FINAL_STATUSES.includes(order.status)) return
@@ -117,7 +118,7 @@ export default function CustomerOrderDetailPage({
   const handleConfirm = async () => {
     if (!order) return
     setSubmitting(true)
-    setError(null)
+    setActionError(null)
     try {
       const res = await fetch(`/api/orders/${order.id}/confirm`, {
         method: "POST",
@@ -131,7 +132,7 @@ export default function CustomerOrderDetailPage({
       }
       await fetchOrder()
     } catch {
-      setError("حدث خطأ في الاتصال")
+      setActionError("حدث خطأ في الاتصال")
     } finally {
       setSubmitting(false)
     }
@@ -208,6 +209,7 @@ export default function CustomerOrderDetailPage({
           deliveredAt={deliveredAt}
           onConfirm={handleConfirm}
           submitting={submitting}
+          actionError={actionError}
         />
       )}
 
@@ -315,10 +317,12 @@ function CountdownAndPoll({
   deliveredAt,
   onConfirm,
   submitting,
+  actionError,
 }: {
   deliveredAt: Date | null
   onConfirm: () => void
   submitting: boolean
+  actionError: string | null
 }) {
   const [remaining, setRemaining] = useState(() => {
     if (!deliveredAt) return 0
@@ -372,6 +376,9 @@ function CountdownAndPoll({
       >
         {submitting ? "جاري التأكيد..." : "استلمت"}
       </Button>
+      {actionError && (
+        <p className="text-red-600 text-sm mt-2">{actionError}</p>
+      )}
     </div>
   )
 }

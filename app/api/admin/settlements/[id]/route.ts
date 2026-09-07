@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client"
 import { requireAdmin } from "@/lib/server-utils"
 import { markSettled } from "@/lib/services/finance-service"
 import { ServiceError } from "@/lib/errors"
-import { z } from "zod"
+import { markSettledSchema } from "@/lib/validations/sprint6"
 
 export const dynamic = "force-dynamic"
 
@@ -19,12 +19,7 @@ export async function PATCH(
   try {
     const { id } = await params
     const body = await request.json()
-    const parsed = z
-      .object({
-        amountSettled: z.number().positive().max(999999999999.99),
-        idempotencyKey: z.string().min(1),
-      })
-      .safeParse(body)
+    const parsed = markSettledSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json({ error: "بيانات غير صحيحة" }, { status: 400 })
     }

@@ -169,7 +169,8 @@ export async function confirmByCustomer(
         where: { id: orderId },
       })
 
-      const response = updated as Order
+      if (!updated) throw new ServiceError("الطلب غير موجود", 404)
+      const response = updated
 
       await recordIdempotencyResult(
         idempotencyKey,

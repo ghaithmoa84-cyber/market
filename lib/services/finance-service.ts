@@ -135,7 +135,10 @@ export async function markSettled(
 ): Promise<SettlementBatch> {
   const cached = await findIdempotentResult(idempotencyKey, adminId, "MARK_SETTLED")
   if (cached) {
-    return JSON.parse(cached.response) as SettlementBatch
+    const parsed = JSON.parse(cached.response)
+    if (parsed?.id === batchId) {
+      return parsed
+    }
   }
 
   const batch = await prisma.settlementBatch.findUnique({
@@ -186,16 +189,11 @@ export async function markSettled(
       if (isFullPayment) {
         const items = await tx.settlementItem.findMany({
           where: { settlementBatchId: batchId },
-          select: {
-            id: true,
-            orderId: true,
-            order: { select: { status: true } },
-            yallaShare: true,
-          },
+          include: { order: { select: { id: true, status: true, courierEarning: true } } },
         })
 
-        const totalYallaShare = items.reduce(
-          (sum, item) => sum.add(item.yallaShare),
+        const totalCourierEarnings = items.reduce(
+          (sum, item) => sum.add(new Prisma.Decimal(item.order.courierEarning)),
           new Prisma.Decimal(0)
         )
 
@@ -216,12 +214,11 @@ export async function markSettled(
             },
           })
 
-          const itemAmountSettled = totalYallaShare.isZero()
+          const proportion = totalCourierEarnings.isZero()
             ? new Prisma.Decimal(0)
-            : item.yallaShare
-                .div(totalYallaShare)
-                .mul(totalPaid)
-                .toDecimalPlaces(2)
+            : new Prisma.Decimal(item.order.courierEarning).div(totalCourierEarnings)
+
+          const itemAmountSettled = amountSettled.mul(proportion).toDecimalPlaces(2)
 
           await tx.settlementItem.update({
             where: { id: item.id },
