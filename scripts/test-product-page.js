@@ -11,8 +11,6 @@ const cookie = fs.readFileSync('cookies.txt', 'utf8')
   })
   .join('; ');
 
-console.log('Cookie string:', cookie.substring(0, 100) + '...');
-
 const options = {
   hostname: 'localhost',
   port: 3000,

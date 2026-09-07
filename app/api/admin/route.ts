@@ -297,6 +297,29 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ users })
       }
 
+      case "couriers": {
+        const couriers = await prisma.courierProfile.findMany({
+          include: {
+            user: {
+              select: { id: true, phone: true, name: true, isActive: true },
+            },
+          },
+          orderBy: { user: { name: "asc" } },
+        })
+        return NextResponse.json({
+          couriers: couriers.map((c) => ({
+            id: c.user.id,
+            phone: c.user.phone,
+            name: c.user.name,
+            isActive: c.user.isActive,
+            courierProfile: {
+              id: c.id,
+              vehicleType: c.vehicleType,
+            },
+          })),
+        })
+      }
+
       case "stores": {
         const stores = await prisma.store.findMany({
           include: {

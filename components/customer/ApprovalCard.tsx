@@ -46,12 +46,12 @@ export default function ApprovalCard({ type, orderId, itemId, altId, data, onRes
         throw new Error(data.error || "فشلت العملية")
       }
       onRespond()
+      setIdempotencyKey(crypto.randomUUID())
     } catch (err) {
       setError(err instanceof Error ? err.message : "خطأ في الاتصال")
     } finally {
       setSubmitting(false)
       setDecision(null)
-      setIdempotencyKey(crypto.randomUUID())
     }
   }
 

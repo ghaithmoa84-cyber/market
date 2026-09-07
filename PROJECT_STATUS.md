@@ -1,12 +1,23 @@
 # Yalla Market — Project Status
 
 ## Sprint الحالي
-Sprint 6 — Delivery & Finance (قيد التنفيذ)
+Sprint 6 — Delivery & Finance (مكتمل ✅)
+Sprint 7 — Full Admin (قيد التنفيذ)
 
 ## ما اكتمل حتى الآن
 - [x] Sprint 5: PR #4 مدمج على master (commit: 1b77920)
 - [x] Sprint 5: مراجعة CodeRabbit كاملة — كل الـ Blockers معالجة
 - [x] Sprint 5: Migration sprint5_complete — كل جداول المشروع موثقة
+- [x] Sprint 6: Schema — FinancialLedger, SettlementBatch, SettlementItem
+- [x] Sprint 6: Migration sprint6_finance — مطبق
+- [x] Sprint 6: lib/validations/sprint6.ts
+- [x] Sprint 6: lib/services/delivery-service.ts (confirmDelivery, confirmByCustomer, autoConfirm, checkAndAutoConfirm)
+- [x] Sprint 6: lib/services/finance-service.ts (postLedgerEntries, createSettlementBatch, markSettled)
+- [x] Sprint 6: 7 API Routes — deliver (COURIER), confirm (CUSTOMER), auto-confirm (CRON_SECRET), admin/settlements (ADMIN), courier/settlements (COURIER)
+- [x] Sprint 6: Courier UI — زر "تم التسليم" عند DELIVERING
+- [x] Sprint 6: Customer UI — زر "استلمت" + عداد تنازلي عند DELIVERED
+- [x] Sprint 6: Admin UI — صفحة تسويات (إنشاء + تسوية)
+- [x] Sprint 6: CRON_SECRET في .env.example
 - [x] تهيئة المشروع: Next.js 16.x, TypeScript strict, Tailwind 4
 - [x] Prisma Schema كامل (User, CustomerProfile, CourierProfile, Store, StoreHours, Category, Product, StoreProduct, PriceHistory, SearchLog)
 - [x] lib/config.ts — Config module موحد
