@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { requireAdmin } from "@/lib/server-utils"
 import { createSettlementBatch } from "@/lib/services/finance-service"
+import { ServiceError } from "@/lib/errors"
 import { z } from "zod"
 
 export const dynamic = "force-dynamic"
@@ -63,16 +64,14 @@ export async function POST(request: NextRequest) {
       session.user.id
     )
     return NextResponse.json({ success: true, batch })
-  } catch (err) {
-    console.error(err instanceof Error ? err.message : "Create settlement error")
-    if (err instanceof Error) {
-      if (err.message === "لا توجد أوامر مستحقة التسوية لهذا المندوب") {
-        return NextResponse.json({ error: err.message }, { status: 400 })
-      }
-      if (err.message === "تسوية لهذا المندوب في هذا التاريخ موجودة بالفعل") {
-        return NextResponse.json({ error: err.message }, { status: 409 })
-      }
+  } catch (error) {
+    if (error instanceof ServiceError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode }
+      )
     }
+    console.error("[settlements-create]", error instanceof Error ? error.message : String(error))
     return NextResponse.json({ error: "حدث خطأ غير متوقع" }, { status: 500 })
   }
 }

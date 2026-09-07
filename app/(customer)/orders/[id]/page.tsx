@@ -91,15 +91,19 @@ export default function CustomerOrderDetailPage({
   }, [fetchOrder])
 
   useEffect(() => {
+    const FINAL_STATUSES = ["SETTLED", "CANCELLED", "CONFIRMED"]
     if (!order) return
+
+    if (FINAL_STATUSES.includes(order.status)) return
 
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`/api/orders/${order.id}`)
         if (res.ok) {
           const data = await res.json()
-          if (data.order.status !== order.status) {
-            await fetchOrder()
+          setOrder(data.order)
+          if (FINAL_STATUSES.includes(data.order.status)) {
+            clearInterval(interval)
           }
         }
       } catch {

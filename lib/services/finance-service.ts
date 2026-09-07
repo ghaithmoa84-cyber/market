@@ -104,22 +104,25 @@ export async function createSettlementBatch(
         },
       })
 
-      for (const order of orders) {
-        await tx.settlementItem.create({
-          data: {
-            settlementBatchId: batch.id,
-            orderId: order.id,
-            yallaShare: order.yallaShare,
-            amountSettled: new Prisma.Decimal(0),
-          },
-        })
-      }
+      await tx.settlementItem.createMany({
+        data: orders.map((order) => ({
+          settlementBatchId: batch.id,
+          orderId: order.id,
+          yallaShare: order.yallaShare,
+          amountSettled: new Prisma.Decimal(0),
+        })),
+        skipDuplicates: true,
+      })
 
       return batch
     })
   } catch (err) {
     if (isUniqueViolation(err)) {
-      throw new ServiceError("تسوية لهذا المندوب في هذا التاريخ موجودة بالفعل", 409)
+      const target = (err as { meta?: { target?: string[] } }).meta?.target
+      if (target?.includes("orderId")) {
+        throw new ServiceError("أحد الطلبات موجود في تسوية سابقة", 409)
+      }
+      throw new ServiceError("يوجد تسوية لهذا المندوب في نفس التاريخ", 409)
     }
     throw err
   }
@@ -138,7 +141,7 @@ export async function markSettled(
 
   const batch = await prisma.settlementBatch.findUnique({
     where: { id: batchId },
-    select: { id: true, status: true, amountDue: true },
+    select: { id: true, status: true, amountDue: true, amountSettled: true },
   })
   if (!batch) {
     throw new ServiceError("دفعة التسوية غير موجودة", 404)
@@ -151,16 +154,33 @@ export async function markSettled(
     return settled as SettlementBatch
   }
 
-  const isFullPayment = amountSettled.gte(new Prisma.Decimal(batch.amountDue))
+  const currentAmountSettled = new Prisma.Decimal(batch.amountSettled)
+  const totalPaid = currentAmountSettled.add(amountSettled)
+  const isFullPayment = totalPaid.gte(new Prisma.Decimal(batch.amountDue))
   const newStatus = isFullPayment ? SettlementStatus.SETTLED : SettlementStatus.PARTIAL
 
   try {
     const result = await prisma.$transaction(async (tx) => {
+      const currentBatch = await tx.settlementBatch.findUnique({
+        where: { id: batchId },
+        select: { amountDue: true, amountSettled: true, status: true },
+      })
+      if (!currentBatch) {
+        throw new ServiceError("الدفعة غير موجودة", 404)
+      }
+
+      const totalPaid = new Prisma.Decimal(currentBatch.amountSettled).add(
+        amountSettled
+      )
+      if (totalPaid.gt(new Prisma.Decimal(currentBatch.amountDue))) {
+        throw new ServiceError("المبلغ الإجمالي يتجاوز المستحق", 400)
+      }
+
       const updatedBatch = await tx.settlementBatch.update({
         where: { id: batchId },
         data: {
           status: newStatus,
-          amountSettled,
+          amountSettled: totalPaid,
           settledAt: new Date(),
           settledBy: adminId,
         },

@@ -8,7 +8,7 @@ import {
 import { ServiceError } from "@/lib/errors"
 import config from "@/lib/config"
 import { postLedgerEntries } from "./finance-service"
-import { Order, OrderStatus } from "@prisma/client"
+import { Order, OrderStatus, CourierStatus } from "@prisma/client"
 
 export async function confirmDelivery(
   orderId: string,
@@ -64,9 +64,12 @@ export async function confirmDelivery(
         },
       })
 
-      await tx.courierProfile.update({
-        where: { id: courierId },
-        data: { status: "AVAILABLE" },
+      await tx.courierProfile.updateMany({
+        where: {
+          id: courierId,
+          status: CourierStatus.BUSY,
+        },
+        data: { status: CourierStatus.AVAILABLE },
       })
 
       await recordIdempotencyResult(
@@ -284,6 +287,8 @@ export async function checkAndAutoConfirm(): Promise<void> {
       deliveredAt: { not: null, lt: cutoff },
     },
     select: { id: true },
+    orderBy: { deliveredAt: "asc" },
+    take: 50,
   })
 
   for (const order of orders) {

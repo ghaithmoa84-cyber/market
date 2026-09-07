@@ -1,4 +1,13 @@
 
+-- CreateEnum
+CREATE TYPE "LedgerEntryType" AS ENUM ('YALLA_SHARE', 'COURIER_EARNING', 'ADJUSTMENT');
+
+-- CreateEnum
+CREATE TYPE "LedgerDirection" AS ENUM ('CREDIT', 'DEBIT');
+
+-- CreateEnum
+CREATE TYPE "SettlementStatus" AS ENUM ('PENDING', 'PARTIAL', 'SETTLED');
+
 -- CreateTable
 CREATE TABLE "FinancialLedger" (
     "id" TEXT NOT NULL,

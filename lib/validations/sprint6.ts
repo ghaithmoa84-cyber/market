@@ -14,6 +14,10 @@ export const createSettlementSchema = z.object({
 })
 
 export const markSettledSchema = z.object({
-  amountSettled: z.number().positive().max(999999999999.99),
+  amountSettled: z
+    .number()
+    .positive("المبلغ يجب أن يكون موجباً")
+    .max(999999999999.99, "المبلغ كبير جداً")
+    .multipleOf(0.01, "المبلغ يجب أن يكون بحد أقصى خانتان عشريتان"),
   idempotencyKey: z.string().min(1),
 })

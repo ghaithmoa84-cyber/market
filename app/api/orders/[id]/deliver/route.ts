@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { confirmDelivery } from "@/lib/services/delivery-service"
+import { ServiceError } from "@/lib/errors"
 import { z } from "zod"
 
 export const dynamic = "force-dynamic"
@@ -37,16 +38,11 @@ export async function POST(
 
     const order = await confirmDelivery(id, profile.id, parsed.data.idempotencyKey)
     return NextResponse.json({ success: true, order })
-  } catch (err) {
-    console.error(err instanceof Error ? err.message : "Confirm delivery error")
-    if (err instanceof Error) {
-      if (err.message === "الطلب غير مسند لهذا المندوب") {
-        return NextResponse.json({ error: err.message }, { status: 403 })
-      }
-      if (err.message === "الطلب ليس في حالة توصيل نشطة") {
-        return NextResponse.json({ error: err.message }, { status: 400 })
-      }
+  } catch (error) {
+    if (error instanceof ServiceError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode })
     }
+    console.error("[deliver]", error instanceof Error ? error.message : String(error))
     return NextResponse.json({ error: "حدث خطأ غير متوقع" }, { status: 500 })
   }
 }

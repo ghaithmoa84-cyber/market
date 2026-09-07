@@ -426,5 +426,6 @@ model SettlementItem {
   createdAt         DateTime        @default(now())
 
   @@unique([settlementBatchId, orderId])
+  @@unique([orderId])
   @@index([orderId])
 }
