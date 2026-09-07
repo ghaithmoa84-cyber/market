@@ -50,13 +50,6 @@ export default function AdminSettlementsPage() {
   const [settleError, setSettleError] = useState<string | null>(null)
   const [settleBatchId, setSettleBatchId] = useState<string | null>(null)
 
-  const openSettlementForm = (batch: SettlementBatch) => {
-    setSettleBatchId(batch.id)
-    const remaining = Number(batch.amountDue) - Number(batch.amountSettled || 0)
-    setSettleAmount(remaining > 0 ? String(remaining) : "")
-    setSettleError(null)
-  }
-
   const fetchSettlements = useCallback(async (isInitial = false) => {
     if (isInitial) setLoading(true)
     setError(null)
@@ -324,7 +317,15 @@ export default function AdminSettlementsPage() {
                       <Button
                         size="sm"
                         variant="secondary"
-                        onClick={() => openSettlementForm(batch)}
+                        onClick={() => {
+                          const current = batches.find(b => b.id === batch.id)
+                          if (current) {
+                            const remaining = Number(current.amountDue) - Number(current.amountSettled || 0)
+                            setSettleAmount(remaining > 0 ? remaining.toFixed(2) : "")
+                          }
+                          setSettleBatchId(batch.id)
+                          setSettleError(null)
+                        }}
                         className="min-h-[48px]"
                       >
                         تم الدفع
