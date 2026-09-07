@@ -111,7 +111,6 @@ export async function createSettlementBatch(
           yallaShare: order.yallaShare,
           amountSettled: new Prisma.Decimal(0),
         })),
-        skipDuplicates: true,
       })
 
       return batch
@@ -154,11 +153,6 @@ export async function markSettled(
     return settled as SettlementBatch
   }
 
-  const currentAmountSettled = new Prisma.Decimal(batch.amountSettled)
-  const totalPaid = currentAmountSettled.add(amountSettled)
-  const isFullPayment = totalPaid.gte(new Prisma.Decimal(batch.amountDue))
-  const newStatus = isFullPayment ? SettlementStatus.SETTLED : SettlementStatus.PARTIAL
-
   try {
     const result = await prisma.$transaction(async (tx) => {
       const currentBatch = await tx.settlementBatch.findUnique({
@@ -175,6 +169,9 @@ export async function markSettled(
       if (totalPaid.gt(new Prisma.Decimal(currentBatch.amountDue))) {
         throw new ServiceError("المبلغ الإجمالي يتجاوز المستحق", 400)
       }
+
+      const isFullPayment = totalPaid.gte(new Prisma.Decimal(currentBatch.amountDue))
+      const newStatus = isFullPayment ? SettlementStatus.SETTLED : SettlementStatus.PARTIAL
 
       const updatedBatch = await tx.settlementBatch.update({
         where: { id: batchId },
@@ -193,8 +190,14 @@ export async function markSettled(
             id: true,
             orderId: true,
             order: { select: { status: true } },
+            yallaShare: true,
           },
         })
+
+        const totalYallaShare = items.reduce(
+          (sum, item) => sum.add(item.yallaShare),
+          new Prisma.Decimal(0)
+        )
 
         for (const item of items) {
           assertTransition(item.order.status, OrderStatus.SETTLED)
@@ -213,9 +216,16 @@ export async function markSettled(
             },
           })
 
+          const itemAmountSettled = totalYallaShare.isZero()
+            ? new Prisma.Decimal(0)
+            : item.yallaShare
+                .div(totalYallaShare)
+                .mul(totalPaid)
+                .toDecimalPlaces(2)
+
           await tx.settlementItem.update({
             where: { id: item.id },
-            data: { amountSettled },
+            data: { amountSettled: itemAmountSettled },
           })
         }
       }
