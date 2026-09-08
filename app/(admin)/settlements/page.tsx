@@ -139,6 +139,9 @@ export default function AdminSettlementsPage() {
     setSettleSubmitting(true)
     setSettleError(null)
 
+    const capturedBatchId = settleBatchId
+    const capturedKey = settleIdempotencyKey
+
     const amount = Number(settleAmount)
     if (!amount || amount <= 0) {
       setSettleError("أدخل مبلغاً صحيحاً")
@@ -147,19 +150,21 @@ export default function AdminSettlementsPage() {
     }
 
     try {
-      const res = await fetch(`/api/admin/settlements/${settleBatchId}`, {
+      const res = await fetch(`/api/admin/settlements/${capturedBatchId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amountSettled: amount,
-          idempotencyKey: settleIdempotencyKey,
+          idempotencyKey: capturedKey,
         }),
       })
 
       if (res.ok) {
         setSettleAmount("")
-        setSettleBatchId(null)
-        setSettleIdempotencyKey(null)
+        if (settleBatchId === capturedBatchId) {
+          setSettleBatchId(null)
+          setSettleIdempotencyKey(null)
+        }
         fetchSettlements()
       } else {
         const data = await res.json()
@@ -329,6 +334,7 @@ export default function AdminSettlementsPage() {
                           setSettleBatchId(batch.id)
                           setSettleError(null)
                         }}
+                        disabled={settleSubmitting}
                         className="min-h-[48px]"
                       >
                         تم الدفع
