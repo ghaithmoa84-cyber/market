@@ -49,6 +49,7 @@ export default function AdminSettlementsPage() {
   const [settleSubmitting, setSettleSubmitting] = useState(false)
   const [settleError, setSettleError] = useState<string | null>(null)
   const [settleBatchId, setSettleBatchId] = useState<string | null>(null)
+  const [settleIdempotencyKey, setSettleIdempotencyKey] = useState<string | null>(null)
 
   const fetchSettlements = useCallback(async (isInitial = false) => {
     if (isInitial) setLoading(true)
@@ -134,7 +135,7 @@ export default function AdminSettlementsPage() {
 
   const handleMarkSettled = async (e: React.MouseEvent) => {
     e.preventDefault()
-    if (!settleBatchId) return
+    if (!settleBatchId || !settleIdempotencyKey) return
     setSettleSubmitting(true)
     setSettleError(null)
 
@@ -151,13 +152,14 @@ export default function AdminSettlementsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amountSettled: amount,
-          idempotencyKey: crypto.randomUUID(),
+          idempotencyKey: settleIdempotencyKey,
         }),
       })
 
       if (res.ok) {
         setSettleAmount("")
         setSettleBatchId(null)
+        setSettleIdempotencyKey(null)
         fetchSettlements()
       } else {
         const data = await res.json()
@@ -323,6 +325,7 @@ export default function AdminSettlementsPage() {
                             const remaining = Number(current.amountDue) - Number(current.amountSettled || 0)
                             setSettleAmount(remaining > 0 ? remaining.toFixed(2) : "")
                           }
+                          setSettleIdempotencyKey(crypto.randomUUID())
                           setSettleBatchId(batch.id)
                           setSettleError(null)
                         }}
