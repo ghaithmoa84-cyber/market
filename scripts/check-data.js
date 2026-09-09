@@ -26,6 +26,7 @@ const p = new PrismaClient();
     console.log('storesList:', JSON.stringify(storesList));
   } catch (err) {
     console.error(err);
+    process.exitCode = 1;
   } finally {
     await p.$disconnect();
   }

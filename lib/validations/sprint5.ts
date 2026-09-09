@@ -23,7 +23,7 @@ export const actualItemSchema = z.object({
   actualPrice: z.number()
     .positive("السعر يجب أن يكون موجباً")
     .max(MAX_DECIMAL_14_2, "السعر كبير جداً")
-    .multipleOf(0.01, "السعر يجب أن يكون بحد أقصى ختان عشريتان"),
+    .multipleOf(0.01, "السعر يجب أن يكون بحد أقصى خانتان عشريتان"),
   idempotencyKey: z.string().min(1),
 }).refine(
   (data) => data.actualQty * data.actualPrice <= MAX_DECIMAL_14_2,

@@ -101,6 +101,8 @@ export default function CourierOrderDetailPage({
   const [error, setError] = useState("")
   const [transitioning, setTransitioning] = useState(false)
   const [orderId, setOrderId] = useState("")
+  const [delivering, setDelivering] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
     params.then((p) => setOrderId(p.id))
@@ -152,6 +154,30 @@ export default function CourierOrderDetailPage({
       setError("خطأ في الاتصال")
     } finally {
       setTransitioning(false)
+    }
+  }
+
+  const handleDeliver = async () => {
+    if (!order) return
+    setDelivering(true)
+    setActionError(null)
+    try {
+      const res = await fetch(`/api/orders/${order.id}/deliver`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idempotencyKey: crypto.randomUUID() }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setOrder((prev) => (prev ? { ...prev, status: data.order.status } : prev))
+      } else {
+        const data = await res.json()
+        setError(data.error || "فشل تسجيل التسليم")
+      }
+    } catch {
+      setActionError("حدث خطأ في الاتصال")
+    } finally {
+      setDelivering(false)
     }
   }
 
@@ -303,6 +329,21 @@ export default function CourierOrderDetailPage({
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {order.status === "DELIVERING" && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <Button
+            onClick={handleDeliver}
+            disabled={delivering}
+            className="min-h-[48px]"
+          >
+            {delivering ? "جاري التسجيل..." : "تم التسليم"}
+          </Button>
+          {actionError && (
+            <p className="text-red-600 text-sm mt-2">{actionError}</p>
+          )}
         </div>
       )}
     </div>

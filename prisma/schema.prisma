@@ -45,6 +45,7 @@ model CourierProfile {
   status      CourierStatus @default(OFFLINE)
   vehicleType String
   orders      Order[]
+  settlements SettlementBatch[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }
@@ -204,6 +205,8 @@ model Order {
   orderStores      OrderStore[]
   items            OrderItem[]
   events           OrderEvent[]
+  ledgerEntries    FinancialLedger[]
+  settlementItems  SettlementItem[]
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 
@@ -357,4 +360,72 @@ model Notification {
   updatedAt DateTime @updatedAt
 
   @@index([userId, createdAt])
+}
+
+enum LedgerEntryType {
+  YALLA_SHARE
+  COURIER_EARNING
+  ADJUSTMENT
+}
+
+enum LedgerDirection {
+  CREDIT
+  DEBIT
+}
+
+enum SettlementStatus {
+  PENDING
+  PARTIAL
+  SETTLED
+}
+
+model FinancialLedger {
+  id                String          @id @default(cuid())
+  orderId           String
+  courierId         String?
+  order             Order           @relation(fields: [orderId], references: [id])
+  type              LedgerEntryType
+  direction         LedgerDirection
+  amount            Decimal         @db.Decimal(14,2)
+  idempotencyKey    String          @unique
+  referenceLedgerId String?
+  note              String?
+  createdAt         DateTime        @default(now())
+
+  @@index([orderId, createdAt])
+  @@index([courierId, createdAt])
+}
+
+model SettlementBatch {
+  id                   String           @id @default(cuid())
+  courierId            String
+  courier              CourierProfile   @relation(fields: [courierId], references: [id])
+  settlementDate       DateTime
+  totalDeliveryFees    Decimal          @db.Decimal(14,2)
+  totalYallaShare      Decimal          @db.Decimal(14,2)
+  totalCourierEarnings Decimal          @db.Decimal(14,2)
+  amountDue            Decimal          @db.Decimal(14,2)
+  amountSettled        Decimal          @db.Decimal(14,2)
+  status               SettlementStatus @default(PENDING)
+  settledAt            DateTime?
+  settledBy            String?
+  items                SettlementItem[]
+  createdAt            DateTime         @default(now())
+
+  @@unique([courierId, settlementDate])
+}
+
+model SettlementItem {
+  id                String          @id @default(cuid())
+  settlementBatchId String
+  orderId           String
+  settlementBatch   SettlementBatch @relation(fields: [settlementBatchId], references: [id])
+  order             Order           @relation(fields: [orderId], references: [id])
+  yallaShare        Decimal         @db.Decimal(14,2)
+  amountSettled     Decimal         @db.Decimal(14,2)
+  createdAt         DateTime        @default(now())
+
+  @@unique([settlementBatchId, orderId])
+  @@unique([orderId])
+  @@index([orderId])
 }

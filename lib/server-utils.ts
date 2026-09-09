@@ -18,3 +18,25 @@ export async function requireActiveSession() {
   }
   return session
 }
+
+export async function requireCourier() {
+  const session = await auth()
+  if (!session?.user || !session.user?.role) {
+    return null
+  }
+  if (session.user.role !== "COURIER") {
+    return null
+  }
+  return session
+}
+
+export async function requireCustomer() {
+  const session = await auth()
+  if (!session?.user || !session.user?.role) {
+    return null
+  }
+  if (session.user.role !== "CUSTOMER") {
+    return null
+  }
+  return session
+}
