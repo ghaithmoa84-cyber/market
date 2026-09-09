@@ -1,8 +1,8 @@
 # Yalla Market — Project Status
 
 ## Sprint الحالي
-Sprint 6 — Delivery & Finance (مكتمل ✅)
-Sprint 7 — Full Admin (قيد التنفيذ)
+Sprint 7 — Full Admin (مكتمل ✅)
+Sprint 8 — QA & Production (قيد التنفيذ)
 
 ## ما اكتمل حتى الآن
 - [x] Sprint 5: PR #4 مدمج على master (commit: 1b77920)
@@ -48,9 +48,15 @@ Sprint 7 — Full Admin (قيد التنفيذ)
 - [x] Sprint 3: app/(customer)/cart/page.tsx
 - [x] Sprint 3: app/(customer)/orders/page.tsx
 - [x] Sprint 3: app/(customer)/orders/[id]/page.tsx
+- [x] Sprint 7: Dashboard محسّن (Today's Orders, Active Orders, Revenue, Pending Settlements)
+- [x] Sprint 7: Live Orders مع فلتر حسب الحالة وتفاصيل كاملة
+- [x] Sprint 7: Admin Intervention على الطلبات (PATCH /api/admin/orders/[id])
+- [x] Sprint 7: Search Miss Report (عمليات البحث الفاشلة)
+- [x] Sprint 7: Courier Management كامل (قائمة، إنشاء، تعديل، تفعيل/تعطيل)
+- [x] Sprint 7: Store Management كامل (قائمة، إنشاء، تعديل، حذف، تفعيل/تعطيل، ساعات العمل)
+- [x] Sprint 7: Reports (مبيعات، مندوبين، متاجر)
 
 ## Sprints القادمة
-- Sprint 7: Full Admin
 - Sprint 8: QA & Production
 
 ## ملاحظات مؤجلة لما بعد Sprint 8
@@ -75,7 +81,7 @@ Sprint 7 — Full Admin (قيد التنفيذ)
 ## ملفات المرجع
 - `Yalla Market Finder.docx` — رؤية المشروع والقرارات التشغيلية
 - `MVP Technical Specification V1.1.docx` — المرجع التقني الكامل
-- `Sprint 3 Brief.md` — تفاصيل Sprint الحالي
+- `Sprint 7 Brief.md` — تفاصيل Sprint الحالي
 - `CLAUDE.md` — قواعد العمل الدائمة
 
 ## تعليمات لأي محادثة جديدة
