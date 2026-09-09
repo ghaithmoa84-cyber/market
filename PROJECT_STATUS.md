@@ -18,6 +18,9 @@ Sprint 7 — Full Admin (قيد التنفيذ)
 - [x] Sprint 6: Customer UI — زر "استلمت" + عداد تنازلي عند DELIVERED
 - [x] Sprint 6: Admin UI — صفحة تسويات (إنشاء + تسوية)
 - [x] Sprint 6: CRON_SECRET في .env.example
+- [x] Sprint 6: PR #5 مدمج على master (commit: edb0bc0)
+- [x] Sprint 6: migrations: sprint6_finance + add_settlement_item_unique
+- [x] Sprint 6: CodeRabbit — كل الـ Blockers معالجة
 - [x] تهيئة المشروع: Next.js 16.x, TypeScript strict, Tailwind 4
 - [x] Prisma Schema كامل (User, CustomerProfile, CourierProfile, Store, StoreHours, Category, Product, StoreProduct, PriceHistory, SearchLog)
 - [x] lib/config.ts — Config module موحد
@@ -53,6 +56,10 @@ Sprint 7 — Full Admin (قيد التنفيذ)
 ## ملاحظات مؤجلة لما بعد Sprint 8
 - دمج منطق SHOPPING في دالة مشتركة (alternative-service + pricing-service)
 - تغطية Docstrings (حالياً 13% — الهدف 80% في Sprint 8)
+- Trigger PostgreSQL Append-only على FinancialLedger
+- settlementDate → DATE type (منطقة زمنية)
+- _adminId كـ createdBy في SettlementBatch
+- lib/server-utils.ts قراءة isActive من DB
 
 ## القرارات الثابتة التي لا تتغير
 - Server هو مصدر الحقيقة دائماً
